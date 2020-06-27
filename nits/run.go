@@ -13,6 +13,8 @@ func Run(content *Content) {
 	println("NITS 1.0 -- An ITS for negligence")
 	println("            (c) Copyright 2020  Jos Visser <josvisser66@gmail.com>")
 	println()
+	println("Use ? to get help.")
+	println()
 
 	ui := newUserInterface()
 	defer ui.rl.Close()

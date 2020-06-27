@@ -1,6 +1,9 @@
 package nits
 
-import "math/rand"
+import (
+	"math/rand"
+	"strings"
+)
 
 // --------------------------------------------------------------------
 type Question interface {
@@ -9,20 +12,17 @@ type Question interface {
 
 // --------------------------------------------------------------------
 type MultipleChoiceQuestion struct {
-	Concepts []*Concept
-	Question string
-	Answers []string
+	Concepts      []*Concept
+	Question      string
+	Answers       []string
 	CorrectAnswer int
 }
 
-func (q *MultipleChoiceQuestion) ask(ui *userInterface){
-	ui.print(q.Question, true)
-	ui.newline()
-
+func (q *MultipleChoiceQuestion) ask(ui *userInterface) {
 	answers := make([]string, len(q.Answers))
 	correctAnswer := q.CorrectAnswer
 	copy(answers, q.Answers)
-	rand.Shuffle(len(answers), func(i,j int) {
+	rand.Shuffle(len(answers), func(i, j int) {
 		answers[i], answers[j] = answers[j], answers[i]
 		if correctAnswer == i {
 			correctAnswer = j
@@ -30,17 +30,36 @@ func (q *MultipleChoiceQuestion) ask(ui *userInterface){
 			correctAnswer = i
 		}
 	})
+	displayQuestion := func() {
+		ui.print(q.Question, true)
+		ui.newline()
+		ui.printAnswers(answers)
+		ui.newline()
+	}
+	displayQuestion()
+	ui.pushPrompt("Your answer? ")
+	defer ui.popPrompt()
 
-	ui.printAnswers(answers)
-	ui.newline()
-	ui.getAnswer()
+	for {
+		words := strings.Split(strings.ToLower(strings.TrimSpace(ui.getAnswer(displayQuestion))), " ")
+		if len(words) > 1 || len(words[0]) > 1 {
+			ui.print("Please provide a one letter answer.", true)
+			continue
+		}
+		answer := words[0][0] - 'a'
+		if int(answer) == correctAnswer {
+			ui.print("Correct!", true)
+			return
+		}
+		ui.print("Incorrect", true)
+	}
 }
 
 // --------------------------------------------------------------------
 type PropsQuestion struct {
-	Concepts []*Concept
+	Concepts     []*Concept
 	Propositions []string
-	TrueOrFalse []bool
+	TrueOrFalse  []bool
 }
 
 // --------------------------------------------------------------------
@@ -49,8 +68,8 @@ type AnswerModel struct {
 
 // --------------------------------------------------------------------
 type OpenQuestion struct {
-	Concepts []*Concept
-	Question string
+	Concepts    []*Concept
+	Question    string
 	AnswerModel AnswerModel
 }
 
@@ -58,5 +77,5 @@ type OpenQuestion struct {
 type TrueOrFalseQuestion struct {
 	Concepts []*Concept
 	Question string
-	Answer bool
+	Answer   bool
 }

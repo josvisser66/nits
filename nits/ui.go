@@ -6,20 +6,21 @@ import (
 	"log"
 	"os"
 	"strings"
-	"unicode"
 )
 
 // --------------------------------------------------------------------
 type userInterface struct {
 	rl *readline.Instance
+	promptStack []string
 }
 
 func newUserInterface() *userInterface {
 	var err error
 
-	ui := &userInterface{}
+	ui := &userInterface{
+		promptStack: make([]string, 0, 10),
+	}
 	ui.rl, err = readline.NewEx(&readline.Config{
-		Prompt:      "\033[31m»\033[0m ",
 		HistoryFile: "/tmp/readline.tmp",
 		// AutoComplete:    completer,
 		InterruptPrompt: "^C",
@@ -32,8 +33,19 @@ func newUserInterface() *userInterface {
 		panic(err)
 	}
 
+	ui.pushPrompt("\033[31m»\033[0m ")
 	log.SetOutput(ui.rl.Stderr())
 	return ui
+}
+
+func (ui* userInterface) pushPrompt(t string) {
+	ui.promptStack = append(ui.promptStack, t)
+	ui.rl.SetPrompt(t)
+}
+
+func (ui* userInterface) popPrompt() {
+	ui.promptStack = ui.promptStack[:len(ui.promptStack)-1]
+	ui.rl.SetPrompt(ui.promptStack[len(ui.promptStack) - 1])
 }
 
 func (ui *userInterface) newline() {
@@ -86,28 +98,39 @@ func filterInput(r rune) (rune, bool) {
 	return r, true
 }
 
-func (ui *userInterface) yesno(question string) bool {
-	ui.print(question+ " (Y/N)? ", false)
+func (ui *userInterface) yesNo(question string) bool {
+	ui.pushPrompt(question+" (Y/N)? ")
+	defer ui.popPrompt()
 
 	for {
-		r := unicode.ToUpper(ui.rl.Terminal.ReadRune())
-		ui.print("Answer is " + string(r), true)
-		switch r {
-		case 'Y':
+		line, err := ui.rl.Readline()
+		if err != nil {
+			continue
+		}
+		switch strings.TrimSpace(strings.ToLower(line)) {
+		case "y":
+			fallthrough
+		case "yes":
 			return true
-		case 'N':
+		case "n":
+			fallthrough
+		case "no":
 			return false
 		}
 	}
 }
 
 func (ui *userInterface) exit() {
-	if ui.yesno("Are you sure you want to quit") {
+	if ui.yesNo("Are you sure you want to quit") {
 		os.Exit(0)
 	}
 }
 
-func (ui *userInterface) getAnswer() string {
+func (ui *userInterface) help() {
+	ui.print("Help! I need somebody!", true)
+}
+
+func (ui *userInterface) getAnswer(displayQuestion func()) string {
 	for {
 		line, err := ui.rl.Readline()
 		if err == readline.ErrInterrupt {
@@ -115,26 +138,18 @@ func (ui *userInterface) getAnswer() string {
 		} else if err == io.EOF {
 			ui.exit()
 		}
-		line = strings.TrimSpace(line)
-		switch {
-		case strings.HasPrefix(line, "mode "):
-			switch line[5:] {
-			case "vi":
-				ui.rl.SetVimMode(true)
-			case "emacs":
-				ui.rl.SetVimMode(false)
-			default:
-				println("invalid mode:", line[5:])
-			}
-		case line == "mode":
-			if ui.rl.IsVimMode() {
-				println("current mode: vim")
-			} else {
-				println("current mode: emacs")
-			}
-		case line == "exit":
+		words := strings.Split(strings.ToLower(strings.TrimSpace(line)), " ")
+		switch words[0] {
+		case "quit":
+			fallthrough
+		case "exit":
 			ui.exit()
-		case line == "":
+		case "?":
+			ui.help()
+		case "again":
+			displayQuestion()
+		case "":
+			continue
 		default:
 			return line
 		}
