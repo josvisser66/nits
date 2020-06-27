@@ -1,11 +1,6 @@
 package nits
 
 // --------------------------------------------------------------------
-type Concept struct {
-	Name string
-}
-
-// --------------------------------------------------------------------
 type Person struct {
 	Name string
 	Injuries []*Injury
@@ -159,25 +154,7 @@ func (p *PropertyDamage) GetDirectCauses() []*Cause {
 }
 
 // --------------------------------------------------------------------
-type Case struct {
-	Concepts []*Concept
-	Persons []*Person
-}
-
-// --------------------------------------------------------------------
-type MultipleChoiceQuestion struct {
-	Concepts []*Concept
-	Question string
-	Answers []string
-	CorrectAnswer int
-	AllowShuffle bool
-}
-
-type AnswerModel struct {
-}
-
-type OpenQuestion struct {
-	Concepts []*Concept
-	Question string
-	AnswerModel AnswerModel
+type Content struct {
+	Questions []Question
+	Cases []*Case
 }

@@ -1,5 +1,8 @@
 package main
 
+import "./nits"
+import "./content"
+
 func main() {
-	print("Hello World")
+	nits.Run(content.GetContent())
 }
