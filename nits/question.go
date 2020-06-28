@@ -11,24 +11,24 @@ type Question interface {
 }
 
 // --------------------------------------------------------------------
+type Answer struct {
+	Text        string
+	Concepts    []*Concept
+	Explanation Explanation
+	Correct     bool
+}
+
 type MultipleChoiceQuestion struct {
-	Concepts      []*Concept
-	Question      string
-	Answers       []string
-	CorrectAnswer int
+	Question string
+	Concepts []*Concept
+	Answers  []*Answer
 }
 
 func (q *MultipleChoiceQuestion) ask(ui *userInterface) {
-	answers := make([]string, len(q.Answers))
-	correctAnswer := q.CorrectAnswer
+	answers := make([]*Answer, len(q.Answers))
 	copy(answers, q.Answers)
 	rand.Shuffle(len(answers), func(i, j int) {
 		answers[i], answers[j] = answers[j], answers[i]
-		if correctAnswer == i {
-			correctAnswer = j
-		} else if correctAnswer == j {
-			correctAnswer = i
-		}
 	})
 	displayQuestion := func() {
 		ui.print(q.Question, true)
@@ -47,7 +47,7 @@ func (q *MultipleChoiceQuestion) ask(ui *userInterface) {
 			continue
 		}
 		answer := words[0][0] - 'a'
-		if int(answer) == correctAnswer {
+		if answers[answer].Correct {
 			ui.print("Correct!", true)
 			return
 		}

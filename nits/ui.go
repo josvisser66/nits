@@ -79,12 +79,12 @@ func (ui *userInterface) printFromStartingWidth(t string, w int, newline bool) {
 	}
 }
 
-func (ui *userInterface) printAnswers(answers []string) {
+func (ui *userInterface) printAnswers(answers []*Answer) {
 	r := 'A'
 
 	for _, a := range answers {
 		ui.print(string(r)+". ", false)
-		ui.printFromStartingWidth(a, 3, true)
+		ui.printFromStartingWidth(a.Text, 3, true)
 		r += 1
 	}
 }
