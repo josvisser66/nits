@@ -2,6 +2,7 @@ package nits
 
 import (
 	"math/rand"
+	"os"
 	"time"
 )
 
@@ -18,6 +19,22 @@ func Run(content *Content) {
 
 	ui := newUserInterface()
 	defer ui.rl.Close()
+
+	ui.pushCommandContext(&CommandContext{
+		"NITS core commands",
+		[]*Command{
+			&Command{
+				[]string{"exit", "quit"},
+				"Exits NITS.",
+				func(line []string) {
+					if ui.yesNo("Are you sure you want to quit") {
+						os.Exit(0)
+					}
+				},
+			},
+		},
+	})
+	defer ui.popCommandContext()
 
 	content.Questions[1].ask(ui)
 }

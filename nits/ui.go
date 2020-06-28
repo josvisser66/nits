@@ -4,14 +4,84 @@ import (
 	"github.com/chzyer/readline"
 	"io"
 	"log"
-	"os"
 	"strings"
 )
 
 // --------------------------------------------------------------------
+type Command struct {
+	Aliases  []string
+	Help     string
+	Executor func([]string)
+}
+
+func (c *Command) matches(cmd string) bool {
+	for _, alias := range c.Aliases {
+		if cmd == alias {
+			return true
+		}
+	}
+
+	return false
+}
+
+type CommandContext struct {
+	Description string
+	Commands []*Command
+}
+
 type userInterface struct {
-	rl *readline.Instance
-	promptStack []string
+	rl                  *readline.Instance
+	column int
+	promptStack         []string
+	commandContextStack []*CommandContext
+}
+
+func (ui *userInterface) pushCommandContext(ctx *CommandContext) {
+	ui.commandContextStack = append(ui.commandContextStack, ctx)
+}
+
+func (ui *userInterface) popCommandContext() {
+	ui.commandContextStack = ui.commandContextStack[:len(ui.commandContextStack)-1]
+}
+
+func (ui *userInterface) giveHelp() {
+	for i := len(ui.commandContextStack) - 1; i >= 0; i-- {
+		ctx := ui.commandContextStack[i]
+
+		for _, cmd := range ctx.Commands {
+			ui.print(strings.Join(cmd.Aliases, "|"), false)
+			ui.print(": ", false)
+			ui.print(cmd.Help, true)
+		}
+	}
+}
+
+func (ui *userInterface) maybeExecuteCommand(line []string) bool {
+	if len(line) == 0 { return false }
+	if line[0] == "?" {
+		ui.giveHelp()
+		return true
+	}
+	for i := len(ui.commandContextStack) - 1; i >= 0; i-- {
+		for _, cmd := range ui.commandContextStack[i].Commands {
+			if cmd.matches(line[0]) {
+				cmd.Executor(line)
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func (ui *userInterface) pushPrompt(t string) {
+	ui.promptStack = append(ui.promptStack, t)
+	ui.rl.SetPrompt(t)
+}
+
+func (ui *userInterface) popPrompt() {
+	ui.promptStack = ui.promptStack[:len(ui.promptStack)-1]
+	ui.rl.SetPrompt(ui.promptStack[len(ui.promptStack)-1])
 }
 
 func newUserInterface() *userInterface {
@@ -38,44 +108,31 @@ func newUserInterface() *userInterface {
 	return ui
 }
 
-func (ui* userInterface) pushPrompt(t string) {
-	ui.promptStack = append(ui.promptStack, t)
-	ui.rl.SetPrompt(t)
-}
-
-func (ui* userInterface) popPrompt() {
-	ui.promptStack = ui.promptStack[:len(ui.promptStack)-1]
-	ui.rl.SetPrompt(ui.promptStack[len(ui.promptStack) - 1])
-}
-
 func (ui *userInterface) newline() {
 	ui.rl.Terminal.PrintRune('\n')
 }
 
 func (ui *userInterface) print(t string, newline bool) {
-	ui.printFromStartingWidth(t, 0, newline)
-}
-
-func (ui *userInterface) printFromStartingWidth(t string, w int, newline bool) {
 	term := ui.rl.Terminal
 	width := term.GetConfig().FuncGetWidth()
 	words := strings.Split(t, " ")
 
 	for _, word := range words {
 		l := len(word)
-		if l+w+1 > width {
+		if l+ui.column+1 > width {
 			term.PrintRune('\n')
-			w = 0
+			ui.column = 0
 		}
-		if w > 0 {
+		if ui.column > 0 {
 			term.PrintRune(' ')
 		}
 		ui.rl.Terminal.Print(word)
-		w += l + 1
+		ui.column += l + 1
 	}
 
 	if newline {
 		term.PrintRune('\n')
+		ui.column = 0
 	}
 }
 
@@ -84,7 +141,7 @@ func (ui *userInterface) printAnswers(answers []*Answer) {
 
 	for _, a := range answers {
 		ui.print(string(r)+". ", false)
-		ui.printFromStartingWidth(a.Text, 3, true)
+		ui.print(a.Text, true)
 		r += 1
 	}
 }
@@ -99,7 +156,7 @@ func filterInput(r rune) (rune, bool) {
 }
 
 func (ui *userInterface) yesNo(question string) bool {
-	ui.pushPrompt(question+" (Y/N)? ")
+	ui.pushPrompt(question + " (Y/N)? ")
 	defer ui.popPrompt()
 
 	for {
@@ -120,38 +177,32 @@ func (ui *userInterface) yesNo(question string) bool {
 	}
 }
 
-func (ui *userInterface) exit() {
-	if ui.yesNo("Are you sure you want to quit") {
-		os.Exit(0)
-	}
-}
-
-func (ui *userInterface) help() {
-	ui.print("Help! I need somebody!", true)
-}
-
 func (ui *userInterface) getAnswer(displayQuestion func()) string {
+	ui.pushCommandContext(&CommandContext{
+		"Answering a question",
+		[]*Command{
+			{
+				[]string{"again"},
+				"Displays the question again.",
+				func(i []string) {
+					displayQuestion()
+				},
+			},
+		},
+	})
+	defer ui.popCommandContext()
+
 	for {
 		line, err := ui.rl.Readline()
 		if err == readline.ErrInterrupt {
 			continue
 		} else if err == io.EOF {
-			ui.exit()
+			ui.print("Please use exit to leave NITS.", true)
 		}
 		words := strings.Split(strings.ToLower(strings.TrimSpace(line)), " ")
-		switch words[0] {
-		case "quit":
-			fallthrough
-		case "exit":
-			ui.exit()
-		case "?":
-			ui.help()
-		case "again":
-			displayQuestion()
-		case "":
+		if len(words) == 0 || ui.maybeExecuteCommand(words) {
 			continue
-		default:
-			return line
 		}
+		return line
 	}
 }
