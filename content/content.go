@@ -54,7 +54,7 @@ func GetContent() *Content {
 	return &Content{
 		Questions: []Question{
 			&MultipleChoiceQuestion{
-				Question: "The concept of reasonable foreseeability is satisfied only if:",
+				Question: []string{"The concept of reasonable foreseeability is satisfied only if:"},
 				Concepts: []*Concept{foreseeability},
 				Answers: []*Answer{
 					{
@@ -76,7 +76,10 @@ func GetContent() *Content {
 				},
 			},
 			&MultipleChoiceQuestion{
-				Question: "Assume that the state of East Delaware has a statute under which Ellen would recover $60,000 of her $300,000 in damages because a jury found her to be 80% negligent in the accident in which she was injured.",
+				Question: []string{
+					"Assume that the state of East Delaware has a statute under which Ellen would recover $60,000 of her $300,000 in damages because a jury found her to be 80% negligent in the accident in which she was injured.",
+					"East Delaware has adopted:",
+				},
 				Answers: []*Answer{
 					{
 						Text: "The defense of pure comparative negligence.",
@@ -92,7 +95,7 @@ func GetContent() *Content {
 						Concepts: []*Concept{contributoryNegligence},
 					},
 					{
-						Text: "The defense of assumption of the risk.",
+						Text: "The defense of assumption of risk.",
 						Concepts: []*Concept{assumptionOfRisk},
 					},
 					{
@@ -102,7 +105,10 @@ func GetContent() *Content {
 				},
 			},
 			&MultipleChoiceQuestion{
-				Question:      "In response to a number of accidents involving pedestrians, a city enacted a statute making it illegal to walk through the business district other than on the sidewalk. The city also enacted a statute making it illegal for a business to obstruct the sidewalk in front of its establishment. Mr. Bean was walking along the sidewalk when he discovered that a store has stacked a pile of boxes such that the sidewalk was totally obstructed. Mr. Bean stepped into the street to walk around the boxes and was struck by a negligently driven taxi. This jurisdiction follows contributory negligence rules",
+				Question:      []string{
+					"In response to a number of accidents involving pedestrians, a city enacted a statute making it illegal to walk through the business district other than on the sidewalk. The city also enacted a statute making it illegal for a business to obstruct the sidewalk in front of its establishment. Mr. Bean was walking along the sidewalk when he discovered that a store has stacked a pile of boxes such that the sidewalk was totally obstructed. Mr. Bean stepped into the street to walk around the boxes and was struck by a negligently driven taxi. This jurisdiction follows contributory negligence rules.",
+					"If Mr. Bean asserts a claim against the taxi driver, what will be the effect of Mr. Bean’s leaving the sidewalk and walking in the street?",
+				},
 				Answers: []*Answer{
 					{
 						Text: "It will bar his recovery as a matter of law.",

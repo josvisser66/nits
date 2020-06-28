@@ -1,6 +1,7 @@
 package nits
 
 import (
+	"fmt"
 	"github.com/chzyer/readline"
 	"io"
 	"log"
@@ -136,6 +137,16 @@ func (ui *userInterface) print(t string, newline bool) {
 	}
 }
 
+func (ui *userInterface) printParagraphs(p []string) {
+	for i, t := range p {
+		ui.print(t, true)
+
+		if i < len(p)-1 {
+			ui.newline()
+		}
+	}
+}
+
 func (ui *userInterface) printAnswers(answers []*Answer) {
 	r := 'A'
 
@@ -177,21 +188,7 @@ func (ui *userInterface) yesNo(question string) bool {
 	}
 }
 
-func (ui *userInterface) getAnswer(displayQuestion func()) string {
-	ui.pushCommandContext(&CommandContext{
-		"Answering a question",
-		[]*Command{
-			{
-				[]string{"again"},
-				"Displays the question again.",
-				func(i []string) {
-					displayQuestion()
-				},
-			},
-		},
-	})
-	defer ui.popCommandContext()
-
+func (ui *userInterface) getInput() []string {
 	for {
 		line, err := ui.rl.Readline()
 		if err == readline.ErrInterrupt {
@@ -203,6 +200,22 @@ func (ui *userInterface) getAnswer(displayQuestion func()) string {
 		if len(words) == 0 || ui.maybeExecuteCommand(words) {
 			continue
 		}
-		return line
+		return words
+	}
+}
+
+func (ui *userInterface) explain(e *Explanation) {
+	ui.printParagraphs(e.Text)
+	ui.newline()
+
+	if e.References != nil {
+		ui.print("References:", true)
+		ui.newline()
+
+		for _, r := range e.References {
+			ui.print(fmt.Sprintf("- %s", r.GetReferenceText()),true)
+		}
+
+		ui.newline()
 	}
 }
