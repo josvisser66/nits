@@ -26,10 +26,12 @@ func Run(content *Content) {
 			&Command{
 				[]string{"exit", "quit"},
 				"Exits NITS.",
-				func(line []string) {
+				func(line []string) bool {
 					if ui.yesNo("Are you sure you want to quit") {
 						os.Exit(0)
 					}
+
+					return false
 				},
 			},
 		},

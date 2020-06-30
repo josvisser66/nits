@@ -1,5 +1,7 @@
 package nits
 
+import "fmt"
+
 // --------------------------------------------------------------------
 type HelpItem struct {
 	Text string
@@ -24,7 +26,7 @@ type Restatement struct {
 }
 
 func (r *Restatement) GetReferenceText() string {
-	return "Restatement, Torts, Second, §" + string(r.Paragraph)
+	return fmt.Sprintf("Restatement, Second, Torts, §%d", r.Paragraph)
 }
 
 type URL struct {

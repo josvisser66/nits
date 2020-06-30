@@ -2,6 +2,7 @@ package nits
 
 import (
 	"math/rand"
+	"sort"
 )
 
 // --------------------------------------------------------------------
@@ -23,6 +24,8 @@ type MultipleChoiceQuestion struct {
 	Answers  []*Answer
 }
 
+// GetAllConcepts returns all the concepts that are directly implicated
+// in the question or its answers.
 func (q *MultipleChoiceQuestion) GetAllConcepts() []*Concept {
 	m := make(map[*Concept]interface{})
 
@@ -44,6 +47,10 @@ func (q *MultipleChoiceQuestion) GetAllConcepts() []*Concept {
 		i++
 	}
 
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i].Name < keys[j].Name
+	})
+
 	return keys
 }
 
@@ -53,11 +60,12 @@ func (q *MultipleChoiceQuestion) ask(ui *userInterface) {
 	rand.Shuffle(len(answers), func(i, j int) {
 		answers[i], answers[j] = answers[j], answers[i]
 	})
-	displayQuestion := func([]string) {
+	displayQuestion := func([]string) bool {
 		ui.printParagraphs(q.Question)
 		ui.newline()
 		ui.printAnswers(answers)
 		ui.newline()
+		return false
 	}
 	displayQuestion(nil)
 	ui.pushPrompt("Your answer? ")
@@ -74,8 +82,9 @@ func (q *MultipleChoiceQuestion) ask(ui *userInterface) {
 			{
 				[]string{"explore"},
 				"Explore the concepts involved in this question.",
-				func([]string) {
+				func([]string) bool {
 					ExploreConcepts(ui, q)
+					return false
 				},
 			},
 		},
@@ -83,7 +92,10 @@ func (q *MultipleChoiceQuestion) ask(ui *userInterface) {
 	defer ui.popCommandContext()
 
 	for {
-		words := ui.getInput()
+		words, ret := ui.getInput()
+		if ret {
+			return
+		}
 		if len(words) > 1 || len(words[0]) > 1 {
 			ui.print("Please provide a one letter answer.", true)
 			continue

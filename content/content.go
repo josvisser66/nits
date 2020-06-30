@@ -27,9 +27,13 @@ func GetContent() *Content {
 	// Links all the contributory and comparative negligence concepts to
 	// one another.
 	comparativeNegligence.Related = []*Concept{modifiedComparativeNegligence, pureComparativeNegligence, contributoryNegligence}
+	comparativeNegligence.SortRelatedConcepts()
 	pureComparativeNegligence.Related = []*Concept{comparativeNegligence, modifiedComparativeNegligence, contributoryNegligence}
+	pureComparativeNegligence.SortRelatedConcepts()
 	modifiedComparativeNegligence.Related = []*Concept{comparativeNegligence, pureComparativeNegligence, contributoryNegligence}
+	modifiedComparativeNegligence.SortRelatedConcepts()
 	contributoryNegligence.Related = []*Concept{comparativeNegligence, modifiedComparativeNegligence, pureComparativeNegligence}
+	contributoryNegligence.SortRelatedConcepts()
 	preponderanceOfTheElements := &Concept{
 		Name:  "preponderance of the elements",
 		Level: 1,

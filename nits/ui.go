@@ -12,7 +12,7 @@ import (
 type Command struct {
 	Aliases  []string
 	Help     string
-	Executor func([]string)
+	Executor func([]string) bool
 }
 
 func (c *Command) matches(cmd string) bool {
@@ -27,12 +27,12 @@ func (c *Command) matches(cmd string) bool {
 
 type CommandContext struct {
 	Description string
-	Commands []*Command
+	Commands    []*Command
 }
 
 type userInterface struct {
 	rl                  *readline.Instance
-	column int
+	column              int
 	promptStack         []string
 	commandContextStack []*CommandContext
 }
@@ -57,22 +57,23 @@ func (ui *userInterface) giveHelp() {
 	}
 }
 
-func (ui *userInterface) maybeExecuteCommand(line []string) bool {
-	if len(line) == 0 { return false }
+func (ui *userInterface) maybeExecuteCommand(line []string) (bool, bool) {
+	if len(line) == 0 {
+		return false, false
+	}
 	if line[0] == "?" {
 		ui.giveHelp()
-		return true
+		return true, false
 	}
 	for i := len(ui.commandContextStack) - 1; i >= 0; i-- {
 		for _, cmd := range ui.commandContextStack[i].Commands {
 			if cmd.matches(line[0]) {
-				cmd.Executor(line)
-				return true
+				return true, cmd.Executor(line)
 			}
 		}
 	}
 
-	return false
+	return false, false
 }
 
 func (ui *userInterface) pushPrompt(t string) {
@@ -188,7 +189,7 @@ func (ui *userInterface) yesNo(question string) bool {
 	}
 }
 
-func (ui *userInterface) getInput() []string {
+func (ui *userInterface) getInput() ([]string, bool) {
 	for {
 		line, err := ui.rl.Readline()
 		if err == readline.ErrInterrupt {
@@ -197,14 +198,29 @@ func (ui *userInterface) getInput() []string {
 			ui.print("Please use exit to leave NITS.", true)
 		}
 		words := strings.Split(strings.ToLower(strings.TrimSpace(line)), " ")
-		if len(words) == 0 || ui.maybeExecuteCommand(words) {
+		if len(words) == 0 {
 			continue
 		}
-		return words
+
+		didExec, ret := ui.maybeExecuteCommand(words)
+		if ret {
+			return words, ret
+		}
+
+		if didExec {
+			continue
+		}
+
+		return words, false
 	}
 }
 
 func (ui *userInterface) explain(e *Explanation) {
+	if e == nil {
+		ui.print("Unfortunately there is no explanation available for this topic. :-(", true)
+		return
+	}
+
 	ui.printParagraphs(e.Text)
 	ui.newline()
 
@@ -213,7 +229,7 @@ func (ui *userInterface) explain(e *Explanation) {
 		ui.newline()
 
 		for _, r := range e.References {
-			ui.print(fmt.Sprintf("- %s", r.GetReferenceText()),true)
+			ui.print(fmt.Sprintf("- %s", r.GetReferenceText()), true)
 		}
 
 		ui.newline()
