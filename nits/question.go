@@ -1,7 +1,6 @@
 package nits
 
 import (
-	"fmt"
 	"math/rand"
 )
 
@@ -91,15 +90,15 @@ func (q *MultipleChoiceQuestion) ask(ui *userInterface) {
 			return
 		}
 		if len(words) > 1 || len(words[0]) > 1 {
-			ui.print("Please provide a one letter answer.", true)
+			ui.println("Please provide a one letter answer.")
 			continue
 		}
 		answer := words[0][0] - 'a'
 		if answers[answer].Correct {
-			ui.print("Correct!", true)
+			ui.println("Correct :-)")
 			return
 		}
-		ui.print("Incorrect", true)
+		ui.print("Incorrect :-(")
 	}
 }
 
@@ -159,27 +158,33 @@ func romanNumeral(number int) string {
 
 func (q *PropsQuestion) ask(ui *userInterface) {
 	displayQuestion := func([]string) bool {
+		ui.println("Consider the following propositions:")
+		ui.newline()
+
 		for i, prop := range q.Propositions {
-			ui.print(fmt.Sprintf("%4s. %s", romanNumeral(i + 1), prop.Proposition), true)
+			ui.println("%4s. %s", romanNumeral(i + 1), prop.Proposition)
 		}
+
 		ui.newline()
 		n := len(q.Propositions) << 1
+		r := 'A'
+
 		for i := 0; i < n; i++ {
-			ui.print(fmt.Sprintf("%c) ", rune('A' + i)), false)
+			ui.print("%c) ", r)
+			r++
 			k := i
 
 			for j := range q.Propositions {
 				if j >0 {
-					ui.print(", ", false)
+					ui.print(", ")
 				}
-				ui.print(fmt.Sprintf("%s is ", romanNumeral((j + 1))), false)
 				var s string
 				if k%2 == 1 {
 					s = "true"
 				} else {
 					s = "false"
 				}
-				ui.print(s, false)
+				ui.print("%s is %s", romanNumeral((j + 1)), s)
 				k >>= 1
 			}
 
@@ -219,16 +224,15 @@ func (q *PropsQuestion) ask(ui *userInterface) {
 			return
 		}
 		if len(words) > 1 || len(words[0]) > 1 {
-			ui.print("Please provide a one letter answer.", true)
+			ui.println("Please provide a one letter answer.")
 			continue
 		}
 		answer := words[0][0] - 'a'
-
 		if q.Propositions[answer].True {
-			ui.print("Correct!", true)
+			ui.println("Correct :-)")
 			return
 		}
-		ui.print("Incorrect", true)
+		ui.println("Incorrect :-(")
 	}
 }
 

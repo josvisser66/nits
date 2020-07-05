@@ -1,7 +1,6 @@
 package nits
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -24,7 +23,7 @@ func (ui *userInterface) explainConcept(words []string, concepts []*Concept) {
 	name := strings.Join(words[1:], " ")
 	concept := findConcept(concepts, name)
 	if concept == nil {
-		ui.print(fmt.Sprintf("Concept '%s' not found."), true)
+		ui.println("Concept '%s' not found.", name)
 		ui.newline()
 		return
 	}
@@ -37,7 +36,7 @@ func ExploreConcepts(ui *userInterface, b ConceptBucket) {
 
 	showConcepts := func([]string) bool {
 		for i, c := range concepts {
-			ui.print(fmt.Sprintf("%d: %s", i+1, c.name), true)
+			ui.println("%d: %s", i+1, c.name)
 		}
 
 		ui.newline()
@@ -72,7 +71,7 @@ func ExploreConcepts(ui *userInterface, b ConceptBucket) {
 	defer ui.popPrompt()
 
 	ui.newline()
-	ui.print("Here are the concepts that play a role in this question:", true)
+	ui.println("Here are the concepts that play a role in this question:")
 	ui.newline()
 
 	showConcepts(nil)
@@ -103,10 +102,6 @@ func ExploreConcepts(ui *userInterface, b ConceptBucket) {
 		}
 
 		ui.explain(concepts[n-1].explanation)
-
-		if len(concepts[n-1].related) > 0 {
-			ui.print("Here are the related concepts:", true)
-			ui.newline()
-		}
+		ui.newline()
 	}
 }

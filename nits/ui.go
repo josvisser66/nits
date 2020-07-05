@@ -50,9 +50,7 @@ func (ui *userInterface) giveHelp() {
 		ctx := ui.commandContextStack[i]
 
 		for _, cmd := range ctx.Commands {
-			ui.print(strings.Join(cmd.Aliases, "|"), false)
-			ui.print(": ", false)
-			ui.print(cmd.Help, true)
+			ui.println("%s: %s", strings.Join(cmd.Aliases, "|"), cmd.Help)
 		}
 	}
 }
@@ -112,9 +110,16 @@ func newUserInterface() *userInterface {
 
 func (ui *userInterface) newline() {
 	ui.rl.Terminal.PrintRune('\n')
+	ui.column = 0
 }
 
-func (ui *userInterface) print(t string, newline bool) {
+func (ui *userInterface) println(s string, args ...interface{}) {
+	ui.print(s, args...)
+	ui.newline()
+}
+
+func (ui *userInterface) print(s string, args ...interface{}) {
+	t := fmt.Sprintf(s, args...)
 	term := ui.rl.Terminal
 	width := term.GetConfig().FuncGetWidth()
 	words := strings.Split(t, " ")
@@ -131,16 +136,11 @@ func (ui *userInterface) print(t string, newline bool) {
 		ui.rl.Terminal.Print(word)
 		ui.column += l + 1
 	}
-
-	if newline {
-		term.PrintRune('\n')
-		ui.column = 0
-	}
 }
 
 func (ui *userInterface) printParagraphs(p []string) {
 	for i, t := range p {
-		ui.print(t, true)
+		ui.println(t)
 
 		if i < len(p)-1 {
 			ui.newline()
@@ -152,8 +152,7 @@ func (ui *userInterface) printAnswers(answers []*Answer) {
 	r := 'A'
 
 	for _, a := range answers {
-		ui.print(string(r)+". ", false)
-		ui.print(a.Text, true)
+		ui.println("%c) %s", r, a.Text)
 		r += 1
 	}
 }
@@ -195,7 +194,7 @@ func (ui *userInterface) getInput() ([]string, bool) {
 		if err == readline.ErrInterrupt {
 			continue
 		} else if err == io.EOF {
-			ui.print("Please use exit to leave NITS.", true)
+			ui.println("Please use exit to leave NITS.")
 		}
 		words := strings.Split(strings.ToLower(strings.TrimSpace(line)), " ")
 		if len(words) == 0 {
@@ -217,7 +216,7 @@ func (ui *userInterface) getInput() ([]string, bool) {
 
 func (ui *userInterface) explain(e *Explanation) {
 	if e == nil {
-		ui.print("Unfortunately there is no explanation available for this topic. :-(", true)
+		ui.println("Unfortunately there is no explanation available for this topic. :-(")
 		return
 	}
 
@@ -225,11 +224,11 @@ func (ui *userInterface) explain(e *Explanation) {
 	ui.newline()
 
 	if e.References != nil {
-		ui.print("References:", true)
+		ui.println("References:")
 		ui.newline()
 
 		for _, r := range e.References {
-			ui.print(fmt.Sprintf("- %s", r.GetReferenceText()), true)
+			ui.print("- %s", r.GetReferenceText())
 		}
 
 		ui.newline()
