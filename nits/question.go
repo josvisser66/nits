@@ -49,17 +49,18 @@ func (q *MultipleChoiceQuestion) getAllConcepts() []*Concept {
 
 func pushCommandContext(ui *userInterface, q Question, displayQuestion func([]string) bool) {
 	ui.pushCommandContext(&CommandContext{
-		"Answering a multiple choice question",
-		[]*Command{
+		Description: "Answering a multiple choice question",
+		Commands: []*Command{
 			{
-				[]string{"again"},
-				"Displays the question again.",
-				displayQuestion,
+				Aliases:  []string{"again"},
+				Global:   true,
+				Help:     "Displays the question again.",
+				Executor: displayQuestion,
 			},
 			{
-				[]string{"explore"},
-				"Explore the concepts involved in this question.",
-				func([]string) bool {
+				Aliases: []string{"explore"},
+				Help:    "Explore the concepts involved in this question.",
+				Executor: func([]string) bool {
 					ExploreConcepts(ui, q)
 					return false
 				},

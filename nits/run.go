@@ -23,16 +23,25 @@ func Run(content *Content) {
 	defer ui.rl.Close()
 
 	ui.pushCommandContext(&CommandContext{
-		"NITS core commands",
-		[]*Command{
-			&Command{
-				[]string{"exit", "quit"},
-				"Exits NITS.",
-				func(line []string) bool {
+		Description: "NITS core commands",
+		Commands: []*Command{
+			{
+				Aliases: []string{"exit", "quit"},
+				Global: true,
+				Help:    "Exits NITS.",
+				Executor: func(line []string) bool {
 					if ui.yesNo("Are you sure you want to quit") {
 						os.Exit(0)
 					}
-
+					return false
+				},
+			},
+			{
+				Aliases:  []string{"debug"},
+				Global: true,
+				Help:     "NITS debugging (internal)",
+				Executor: func([]string) bool {
+					debug(ui)
 					return false
 				},
 			},

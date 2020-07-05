@@ -11,6 +11,7 @@ import (
 // --------------------------------------------------------------------
 type Command struct {
 	Aliases  []string
+	Global   bool
 	Help     string
 	Executor func([]string) bool
 }
@@ -46,12 +47,19 @@ func (ui *userInterface) popCommandContext() {
 }
 
 func (ui *userInterface) giveHelp() {
+	top := true
 	for i := len(ui.commandContextStack) - 1; i >= 0; i-- {
 		ctx := ui.commandContextStack[i]
+		ui.println("Context: %s", ctx.Description)
 
 		for _, cmd := range ctx.Commands {
-			ui.println("%s: %s", strings.Join(cmd.Aliases, "|"), cmd.Help)
+			if top || cmd.Global {
+				ui.println("  %s: %s", strings.Join(cmd.Aliases, "|"), cmd.Help)
+			}
 		}
+
+		top = false
+		ui.newline()
 	}
 }
 
@@ -63,12 +71,14 @@ func (ui *userInterface) maybeExecuteCommand(line []string) (bool, bool) {
 		ui.giveHelp()
 		return true, false
 	}
+	top := true
 	for i := len(ui.commandContextStack) - 1; i >= 0; i-- {
 		for _, cmd := range ui.commandContextStack[i].Commands {
-			if cmd.matches(line[0]) {
+			if (top || cmd.Global) && cmd.matches(line[0]) {
 				return true, cmd.Executor(line)
 			}
 		}
+		top = false
 	}
 
 	return false, false
