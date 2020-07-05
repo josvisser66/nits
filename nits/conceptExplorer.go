@@ -12,7 +12,7 @@ type ConceptBucket interface {
 
 func findConcept(concepts []*Concept, name string) *Concept {
 	for _, c := range concepts {
-		if c.Name == name {
+		if c.name == name {
 			return c
 		}
 	}
@@ -29,7 +29,7 @@ func (ui *userInterface) explainConcept(words []string, concepts []*Concept) {
 		return
 	}
 
-	ui.explain(concept.Explanation)
+	ui.explain(concept.explanation)
 }
 
 func ExploreConcepts(ui *userInterface, b ConceptBucket) {
@@ -37,7 +37,7 @@ func ExploreConcepts(ui *userInterface, b ConceptBucket) {
 
 	showConcepts := func([]string) bool {
 		for i, c := range concepts {
-			ui.print(fmt.Sprintf("%d: %s", i+1, c.Name), true)
+			ui.print(fmt.Sprintf("%d: %s", i+1, c.name), true)
 		}
 
 		ui.newline()
@@ -102,9 +102,9 @@ func ExploreConcepts(ui *userInterface, b ConceptBucket) {
 			continue
 		}
 
-		ui.explain(concepts[n-1].Explanation)
+		ui.explain(concepts[n-1].explanation)
 
-		if len(concepts[n-1].Related) > 0 {
+		if len(concepts[n-1].related) > 0 {
 			ui.print("Here are the related concepts:", true)
 			ui.newline()
 		}

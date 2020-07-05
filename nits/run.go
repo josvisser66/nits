@@ -17,6 +17,7 @@ func Run(content *Content) {
 	println("Use ? to get help.")
 	println()
 
+	initConcepts()
 	ui := newUserInterface()
 	defer ui.rl.Close()
 
@@ -38,5 +39,5 @@ func Run(content *Content) {
 	})
 	defer ui.popCommandContext()
 
-	content.Questions[1].ask(ui)
+	content.Questions[3].ask(ui)
 }
