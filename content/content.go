@@ -70,23 +70,24 @@ func GetContent() *Content {
 						"has stacked a pile of boxes such that the sidewalk was totally obstructed. Mr. Bean stepped " +
 						"into the street to walk around the boxes and was struck by a negligently driven taxi. " +
 						"This jurisdiction follows contributory negligence rules.",
-					"If Mr. Bean asserts a claim against the taxi driver, what will be the effect of Mr. Bean’s " +
+					"If Mr. Bean asserts a claim against the taxi driver, what will be the effect of Mr. Bean's " +
 						"leaving the sidewalk and walking in the street?",
 				},
 				Answers: []*Answer{
 					{
 						Text:     "It will bar his recovery as a matter of law.",
 						Concepts: []*Concept{ContributoryNegligence, NegligencePerSe},
+						Correct:  true,
 					},
 					{
 						Text:     "It will reduce his recovery.",
 						Concepts: []*Concept{ComparativeNegligence},
 					},
 					{
-						Text: "It may be considered by the trier of fact on the issue of the taxi driver’s liability.",
+						Text: "It may be considered by the trier of fact on the issue of the taxi driver's liability.",
 					},
 					{
-						Text: "It is not relevant to determining Mr. Bean’s rights.",
+						Text: "It is not relevant to determining Mr. Bean's rights.",
 					},
 				},
 			},

@@ -40,5 +40,5 @@ func Run(content *Content) {
 	})
 	defer ui.popCommandContext()
 
-	content.Questions[3].ask(ui)
+	content.Questions[2].ask(ui)
 }

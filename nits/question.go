@@ -88,6 +88,8 @@ func (q *MultipleChoiceQuestion) ask(ui *userInterface) {
 	defer ui.popPrompt()
 	defer ui.popCommandContext()
 
+	attempts := 0
+
 	for {
 		words, ret := ui.getInput()
 		if ret {
@@ -98,11 +100,17 @@ func (q *MultipleChoiceQuestion) ask(ui *userInterface) {
 			continue
 		}
 		answer := words[0][0] - 'a'
+		if int(answer) >= len(answers) {
+			ui.println("Please enter an answer from A to %c.", rune('A'+len(answers)-1))
+			continue
+		}
 		if answers[answer].Correct {
 			ui.println("Correct :-)")
+			registerAnswer(q, attempts == 0)
 			return
 		}
-		ui.print("Incorrect :-(")
+		ui.println("Incorrect :-(")
+		attempts++
 	}
 }
 
@@ -204,7 +212,9 @@ func (q *PropsQuestion) ask(ui *userInterface) {
 	pushCommandContext(ui, q, displayQuestion)
 	defer ui.popPrompt()
 	defer ui.popCommandContext()
+	attempts := 0
 
+outer:
 	for {
 		words, ret := ui.getInput()
 		if ret {
@@ -215,14 +225,20 @@ func (q *PropsQuestion) ask(ui *userInterface) {
 			continue
 		}
 		answer := words[0][0] - 'a'
+		if int(answer) >= len(q.Propositions)<<1 {
+			ui.println("Please enter an answer from A to %c", rune('A'+len(q.Propositions)<<1-1))
+			continue
+		}
 		for _, prop := range q.Propositions {
 			if (answer%2 == 0 && prop.True) || (answer%2 == 1 && !prop.True) {
 				ui.println("Incorrect :-(")
-				return
+				attempts++
+				continue outer
 			}
-			answer>>=1
+			answer >>= 1
 		}
 		ui.println("Correct :-)")
+		registerAnswer(q, attempts == 0)
 		return
 	}
 }
