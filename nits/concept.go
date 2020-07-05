@@ -12,7 +12,13 @@ type Concept struct {
 	hints       []string
 }
 
-func (c *Concept) SortRelatedConcepts() {
+var allConcepts = make([]*Concept, 0)
+
+func (c *Concept) add() *Concept {
+	allConcepts = append(allConcepts, c)
+	return c
+}
+func (c *Concept) sortRelatedConcepts() {
 	sort.Slice(c.related, func(i, j int) bool {
 		return c.related[i].name < c.related[j].name
 	})
@@ -23,12 +29,12 @@ func (c *Concept) GetReferenceText() string {
 }
 
 var (
-	Foreseeability = &Concept{
+	Foreseeability = (&Concept{
 		name:      "foreseeability",
 		shortName: "foreseeability",
 		level:     1,
-	}
-	ComparativeNegligence = &Concept{
+	}).add()
+	ComparativeNegligence = (&Concept{
 		name:      "comparative negligence",
 		shortName: "compneg",
 		level:     1,
@@ -44,8 +50,8 @@ var (
 				&URL{Url: "https://en.wikipedia.org/wiki/Comparative_negligence"},
 			},
 		},
-	}
-	ModifiedComparativeNegligence = &Concept{
+	}).add()
+	ModifiedComparativeNegligence = (&Concept{
 		name:      "modified comparative negligence",
 		shortName: "modcompneg",
 		level:     1,
@@ -58,8 +64,8 @@ var (
 		hints: []string{
 			"What is the difference between this and pure comparative negligence?",
 		},
-	}
-	PureComparativeNegligence = &Concept{
+	}).add()
+	PureComparativeNegligence = (&Concept{
 		name:      "pure comparative negligence",
 		shortName: "purecompneg",
 		level:     1,
@@ -73,23 +79,23 @@ var (
 			"To what extent (percentage) is the plaintiff responsible for the injury or damage?",
 			"Is there a threshold for the extent (percentage) that the plaintiff is responsible?",
 		},
-	}
-	ContributoryNegligence = &Concept{
+	}).add()
+	ContributoryNegligence = (&Concept{
 		name:      "contributory negligence",
 		shortName: "contribneg",
 		level:     1,
-	}
-	PreponderanceOfTheElements = &Concept{
+	}).add()
+	PreponderanceOfTheElements = (&Concept{
 		name:      "preponderance of the elements",
 		shortName: "prepond",
 		level:     1,
-	}
-	AssumptionOfRisk = &Concept{
+	}).add()
+	AssumptionOfRisk = (&Concept{
 		name:      "assumption of risk",
 		shortName: "assumprisk",
 		level:     1,
-	}
-	NegligencePerSe = &Concept{
+	}).add()
+	NegligencePerSe = (&Concept{
 		name:      "negligence per se",
 		shortName: "negperse",
 		level:     1,
@@ -106,7 +112,7 @@ var (
 				&Restatement{288},
 			},
 		},
-	}
+	}).add()
 )
 
 func initConcepts() {
@@ -117,23 +123,23 @@ func initConcepts() {
 		PureComparativeNegligence,
 		ContributoryNegligence,
 	}
-	ComparativeNegligence.SortRelatedConcepts()
 	PureComparativeNegligence.related = []*Concept{
 		ComparativeNegligence,
 		ModifiedComparativeNegligence,
 		ContributoryNegligence,
 	}
-	PureComparativeNegligence.SortRelatedConcepts()
 	ModifiedComparativeNegligence.related = []*Concept{
 		ComparativeNegligence,
 		PureComparativeNegligence,
 		ContributoryNegligence}
-	ModifiedComparativeNegligence.SortRelatedConcepts()
 	ContributoryNegligence.related = []*Concept{
 		ComparativeNegligence,
 		ModifiedComparativeNegligence,
 		PureComparativeNegligence}
-	ContributoryNegligence.SortRelatedConcepts()
+
+	for _, c := range allConcepts {
+		c.sortRelatedConcepts()
+	}
 }
 
 // --------------------------------------------------------------------

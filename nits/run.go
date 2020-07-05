@@ -17,6 +17,7 @@ func Run(content *Content) {
 	println("Use ? to get help.")
 	println()
 
+	initBKT()
 	initConcepts()
 	ui := newUserInterface()
 	defer ui.rl.Close()
