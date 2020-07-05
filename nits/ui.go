@@ -124,13 +124,13 @@ func (ui *userInterface) print(s string, args ...interface{}) {
 	width := term.GetConfig().FuncGetWidth()
 	words := strings.Split(t, " ")
 
-	for _, word := range words {
+	for i, word := range words {
 		l := len(word)
 		if l+ui.column+1 > width {
 			term.PrintRune('\n')
 			ui.column = 0
 		}
-		if ui.column > 0 {
+		if ui.column > 0 && i > 0 {
 			term.PrintRune(' ')
 		}
 		ui.rl.Terminal.Print(word)

@@ -5,8 +5,10 @@ import (
 	"strings"
 )
 
+var active bool
+
 type ConceptBucket interface {
-	GetAllConcepts() []*Concept
+	getAllConcepts() []*Concept
 }
 
 func findConcept(concepts []*Concept, name string) *Concept {
@@ -32,7 +34,13 @@ func (ui *userInterface) explainConcept(words []string, concepts []*Concept) {
 }
 
 func ExploreConcepts(ui *userInterface, b ConceptBucket) {
-	concepts := b.GetAllConcepts()
+	if active {
+		return
+	}
+	active = true
+	defer func() { active = false }()
+
+	concepts := b.getAllConcepts()
 
 	showConcepts := func([]string) bool {
 		for i, c := range concepts {
@@ -76,7 +84,7 @@ func ExploreConcepts(ui *userInterface, b ConceptBucket) {
 
 	showConcepts(nil)
 	help := func() {
-		ui.print("Please enter the number of the concept you want to explore or 'done'.", true)
+		ui.println("Please enter the number of the concept you want to explore or 'done'.")
 	}
 
 	for {

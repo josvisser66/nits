@@ -8,6 +8,7 @@ import (
 type Question interface {
 	ask(ui *userInterface)
 	getConcepts() []*Concept
+	getAllConcepts() []*Concept
 }
 
 // --------------------------------------------------------------------
@@ -28,9 +29,9 @@ func (q *MultipleChoiceQuestion) getConcepts() []*Concept {
 	return q.Concepts
 }
 
-// GetAllConcepts returns all the concepts that are directly implicated
+// getAllConcepts returns all the concepts that are directly implicated
 // in the question or its answers.
-func (q *MultipleChoiceQuestion) GetAllConcepts() []*Concept {
+func (q *MultipleChoiceQuestion) getAllConcepts() []*Concept {
 	m := make(map[*Concept]interface{})
 
 	for _, c := range q.Concepts {
@@ -46,24 +47,7 @@ func (q *MultipleChoiceQuestion) GetAllConcepts() []*Concept {
 	return conceptMapToSlice(m)
 }
 
-
-func (q *MultipleChoiceQuestion) ask(ui *userInterface) {
-	answers := make([]*Answer, len(q.Answers))
-	copy(answers, q.Answers)
-	rand.Shuffle(len(answers), func(i, j int) {
-		answers[i], answers[j] = answers[j], answers[i]
-	})
-	displayQuestion := func([]string) bool {
-		ui.printParagraphs(q.Question)
-		ui.newline()
-		ui.printAnswers(answers)
-		ui.newline()
-		return false
-	}
-	displayQuestion(nil)
-	ui.pushPrompt("Your answer? ")
-	defer ui.popPrompt()
-
+func pushCommandContext(ui *userInterface, q Question, displayQuestion func([]string) bool) {
 	ui.pushCommandContext(&CommandContext{
 		"Answering a multiple choice question",
 		[]*Command{
@@ -82,6 +66,26 @@ func (q *MultipleChoiceQuestion) ask(ui *userInterface) {
 			},
 		},
 	})
+}
+
+func (q *MultipleChoiceQuestion) ask(ui *userInterface) {
+	answers := make([]*Answer, len(q.Answers))
+	copy(answers, q.Answers)
+	rand.Shuffle(len(answers), func(i, j int) {
+		answers[i], answers[j] = answers[j], answers[i]
+	})
+	displayQuestion := func([]string) bool {
+		ui.printParagraphs(q.Question)
+		ui.newline()
+		ui.printAnswers(answers)
+		ui.newline()
+		return false
+	}
+
+	displayQuestion(nil)
+	ui.pushPrompt("Your answer? ")
+	pushCommandContext(ui, q, displayQuestion)
+	defer ui.popPrompt()
 	defer ui.popCommandContext()
 
 	for {
@@ -105,8 +109,8 @@ func (q *MultipleChoiceQuestion) ask(ui *userInterface) {
 // --------------------------------------------------------------------
 type Proposition struct {
 	Proposition string
-	Concepts []*Concept
-	True bool
+	Concepts    []*Concept
+	True        bool
 }
 
 type PropsQuestion struct {
@@ -127,7 +131,7 @@ func (q *PropsQuestion) getConcepts() []*Concept {
 
 // https://codereview.stackexchange.com/questions/202352/int-to-roman-numerals-in-go-golang
 func romanNumeral(number int) string {
-	conversions := []struct{
+	conversions := []struct {
 		value int
 		digit string
 	}{
@@ -162,7 +166,7 @@ func (q *PropsQuestion) ask(ui *userInterface) {
 		ui.newline()
 
 		for i, prop := range q.Propositions {
-			ui.println("%4s. %s", romanNumeral(i + 1), prop.Proposition)
+			ui.println("%4s. %s", romanNumeral(i+1), prop.Proposition)
 		}
 
 		ui.newline()
@@ -175,7 +179,7 @@ func (q *PropsQuestion) ask(ui *userInterface) {
 			k := i
 
 			for j := range q.Propositions {
-				if j >0 {
+				if j > 0 {
 					ui.print(", ")
 				}
 				var s string
@@ -184,38 +188,21 @@ func (q *PropsQuestion) ask(ui *userInterface) {
 				} else {
 					s = "false"
 				}
-				ui.print("%s is %s", romanNumeral((j + 1)), s)
+				ui.print("%s is %s", romanNumeral(j+1), s)
 				k >>= 1
 			}
 
-			ui.newline()
+			ui.println(".")
 		}
 
 		ui.newline()
 		return false
 	}
+
 	displayQuestion(nil)
 	ui.pushPrompt("Your answer? ")
+	pushCommandContext(ui, q, displayQuestion)
 	defer ui.popPrompt()
-
-	ui.pushCommandContext(&CommandContext{
-		"Answering a multiple choice question",
-		[]*Command{
-			{
-				[]string{"again"},
-				"Displays the question again.",
-				displayQuestion,
-			},
-			{
-				[]string{"explore"},
-				"Explore the concepts involved in this question.",
-				func([]string) bool {
-					ExploreConcepts(ui, q)
-					return false
-				},
-			},
-		},
-	})
 	defer ui.popCommandContext()
 
 	for {
@@ -228,17 +215,21 @@ func (q *PropsQuestion) ask(ui *userInterface) {
 			continue
 		}
 		answer := words[0][0] - 'a'
-		if q.Propositions[answer].True {
-			ui.println("Correct :-)")
-			return
+		for _, prop := range q.Propositions {
+			if (answer%2 == 0 && prop.True) || (answer%2 == 1 && !prop.True) {
+				ui.println("Incorrect :-(")
+				return
+			}
+			answer>>=1
 		}
-		ui.println("Incorrect :-(")
+		ui.println("Correct :-)")
+		return
 	}
 }
 
-// GetAllConcepts returns all the concepts that are directly implicated
+// getAllConcepts returns all the concepts that are directly implicated
 // in the question or its answers.
-func (q *PropsQuestion) GetAllConcepts() []*Concept {
+func (q *PropsQuestion) getAllConcepts() []*Concept {
 	return q.getConcepts()
 }
 
