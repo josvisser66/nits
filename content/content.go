@@ -7,6 +7,7 @@ func GetContent() *Content {
 	return &Content{
 		Questions: []Question{
 			&MultipleChoiceQuestion{
+				ShortName: "mc_reasonable_foreseeability1",
 				Question: []string{"The concept of reasonable foreseeability is satisfied only if:"},
 				Concepts: []*Concept{Foreseeability},
 				Answers: []*Answer{
@@ -31,6 +32,7 @@ func GetContent() *Content {
 				},
 			},
 			&MultipleChoiceQuestion{
+				ShortName: "mc_pure_compneg1",
 				Question: []string{
 					"Assume that the state of East Delaware has a statute under which Ellen would recover $60,000 " +
 						"of her $300,000 in damages because a jury found her to be 80% negligent in the accident " +
@@ -62,6 +64,7 @@ func GetContent() *Content {
 				},
 			},
 			&MultipleChoiceQuestion{
+				ShortName: "mc_mrbean_contribneg1",
 				Question: []string{
 					"In response to a number of accidents involving pedestrians, a city enacted a statute making it " +
 						"illegal to walk through the business district other than on the sidewalk. The city also " +
@@ -92,6 +95,7 @@ func GetContent() *Content {
 				},
 			},
 			&PropsQuestion{
+				ShortName: "props_contribneg_compneg1",
 				Propositions: []*Proposition{
 					{
 						Proposition: "Under contributory negligence, if you contribute to your injury, you cannot recover damages.",

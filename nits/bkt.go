@@ -29,7 +29,7 @@ func initBKT() {
 
 // --------------------------------------------------------------------
 type answer struct {
-	q       Question
+	question       Question
 	correct bool
 }
 

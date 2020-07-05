@@ -1,5 +1,14 @@
 package nits
 
+func displayAnswers(ui *userInterface) {
+	ui.println("Registered answers:")
+	ui.newline()
+
+	for _, answer := range answers {
+		ui.println("%5s: %s", answer.correct, answer.question.getShortName())
+	}
+}
+
 func debug(ui *userInterface) {
 	ui.pushCommandContext(&CommandContext{
 		Description: "NITS debugger",
@@ -8,6 +17,7 @@ func debug(ui *userInterface) {
 				Aliases: []string{"answers"},
 				Help:    "Displays all registered answers",
 				Executor: func(strings []string) bool {
+					displayAnswers(ui)
 					return false
 				},
 			},

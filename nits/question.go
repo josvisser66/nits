@@ -9,6 +9,7 @@ type Question interface {
 	ask(ui *userInterface)
 	getConcepts() []*Concept
 	getAllConcepts() []*Concept
+	getShortName() string
 }
 
 // --------------------------------------------------------------------
@@ -20,9 +21,14 @@ type Answer struct {
 }
 
 type MultipleChoiceQuestion struct {
+	ShortName string
 	Question []string
 	Concepts []*Concept
 	Answers  []*Answer
+}
+
+func (q *MultipleChoiceQuestion) getShortName() string {
+	return q.ShortName
 }
 
 func (q *MultipleChoiceQuestion) getConcepts() []*Concept {
@@ -123,7 +129,12 @@ type Proposition struct {
 }
 
 type PropsQuestion struct {
+	ShortName string
 	Propositions []*Proposition
+}
+
+func (q *PropsQuestion) getShortName() string {
+	return q.ShortName
 }
 
 func (q *PropsQuestion) getConcepts() []*Concept {
