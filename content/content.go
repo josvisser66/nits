@@ -8,23 +8,24 @@ func GetContent() *Content {
 		Questions: []Question{
 			&MultipleChoiceQuestion{
 				ShortName: "mc_reasonable_foreseeability1",
-				Question: []string{"The concept of reasonable foreseeability is satisfied only if:"},
-				Concepts: []*Concept{Foreseeability},
+				Question:  []string{"The concept of reasonable foreseeability is satisfied only if:"},
+				Concepts:  []*Concept{Foreseeability},
 				Answers: []*Answer{
 					{
 						Text: "The plaintiff has proved, beyond a reasonable doubt, that he or she in fact " +
-							"suffered a loss that was caused the defendant’s carelessness.",
+							"suffered a loss that was caused the defendant's carelessness.",
 						Concepts: []*Concept{PreponderanceOfTheElements},
 					},
 					{
-						Text: "The defendant’s behavior was virtually certain to inflict a loss on the plaintiff.",
+						Text: "The defendant's behavior was virtually certain to inflict a loss on the plaintiff.",
+						Correct: true,
 					},
 					{
 						Text: "The plaintiff has proved, on a balance of probabilities, that he or she in fact " +
-							"suffered a loss that was actually caused the defendant’s carelessness.",
+							"suffered a loss that was actually caused the defendant's carelessness.",
 					},
 					{
-						Text: "The defendant’s behavior was more likely than not to inflict a loss on the plaintiff.",
+						Text: "The defendant's behavior was more likely than not to inflict a loss on the plaintiff.",
 					},
 					{
 						Text: "None of the above.",
@@ -35,7 +36,7 @@ func GetContent() *Content {
 				ShortName: "mc_pure_compneg1",
 				Question: []string{
 					"Assume that the state of East Delaware has a statute under which Ellen would recover $60,000 " +
-						"of her $300,000 in damages because a jury found her to be 80% negligent in the accident " +
+						"of her $300,000 in damages because a jury found her to be 80%% negligent in the accident " +
 						"in which she was injured.",
 					"East Delaware has adopted:",
 				},

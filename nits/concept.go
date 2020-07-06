@@ -1,6 +1,9 @@
 package nits
 
-import "sort"
+import (
+	"fmt"
+	"sort"
+)
 
 // --------------------------------------------------------------------
 type Concept struct {
@@ -157,4 +160,16 @@ func conceptMapToSlice(m map[*Concept]interface{}) []*Concept {
 	})
 
 	return keys
+}
+
+func checkConcepts() {
+	m := make(map[string]interface{})
+
+	for _, c := range allConcepts {
+		name := c.shortName
+		if _, ok := m[name]; ok {
+			panic(fmt.Sprintf("Duplicate concept short name: %s", name))
+		}
+		m[name] = nil
+	}
 }

@@ -37,4 +37,22 @@ var answers = make([]*answer, 0)
 
 func registerAnswer(q Question, correct bool) {
 	answers = append(answers, &answer{q, correct})
+	burn(q)
+}
+
+// --------------------------------------------------------------------
+var burnt = make(map[Question]interface{})
+
+func burn(q Question) {
+	burnt[q] = nil
+}
+
+func selectQuestion(content *Content) Question {
+	for _, q := range content.Questions {
+		if _, ok := burnt[q]; !ok  {
+			return q
+		}
+	}
+
+	panic("No more questions left!")
 }

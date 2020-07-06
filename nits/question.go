@@ -1,6 +1,7 @@
 package nits
 
 import (
+	"fmt"
 	"math/rand"
 )
 
@@ -10,6 +11,7 @@ type Question interface {
 	getConcepts() []*Concept
 	getAllConcepts() []*Concept
 	getShortName() string
+	check()
 }
 
 // --------------------------------------------------------------------
@@ -25,6 +27,24 @@ type MultipleChoiceQuestion struct {
 	Question []string
 	Concepts []*Concept
 	Answers  []*Answer
+}
+
+func (q *MultipleChoiceQuestion) check() {
+	if len(q.Answers) < 2 {
+		panic(fmt.Sprintf("Question %s does not have at least two answers", q.ShortName))
+	}
+
+	n := 0
+
+	for _, a := range q.Answers {
+		if a.Correct {
+			n++
+		}
+	}
+
+	if n == 0 {
+		panic(fmt.Sprintf("Question %s does not have any correct answers!", q.ShortName))
+	}
 }
 
 func (q *MultipleChoiceQuestion) getShortName() string {
@@ -135,6 +155,12 @@ type PropsQuestion struct {
 
 func (q *PropsQuestion) getShortName() string {
 	return q.ShortName
+}
+
+func (q *PropsQuestion) check() {
+	if len(q.Propositions) < 2 {
+		panic(fmt.Sprintf("Question %s does not have at least 2 propositions"))
+	}
 }
 
 func (q *PropsQuestion) getConcepts() []*Concept {

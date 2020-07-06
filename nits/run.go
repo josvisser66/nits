@@ -1,12 +1,15 @@
 package nits
 
 import (
+	"fmt"
 	"math/rand"
 	"os"
 	"time"
 )
 
 func Run(content *Content) {
+	content.check()
+
 	// This initialization of the random generator is not cryptographically
 	// secure, but it's good enough for our purpose.
 	rand.Seed(time.Now().UnixNano())
@@ -49,5 +52,21 @@ func Run(content *Content) {
 	})
 	defer ui.popCommandContext()
 
-	content.Questions[2].ask(ui)
+	for {
+		selectQuestion(content).ask(ui)
+	}
+}
+
+func (c *Content) check() {
+	checkConcepts()
+	m := make(map[string]interface{})
+
+	for _, q := range c.Questions {
+		name := q.getShortName()
+		if _, ok := m[name]; ok {
+			panic(fmt.Sprintf("Duplicate question short name: %s", name))
+		}
+		m[name]=nil
+		q.check()
+	}
 }

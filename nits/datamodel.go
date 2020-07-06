@@ -156,5 +156,4 @@ func (p *PropertyDamage) GetDirectCauses() []*Cause {
 // --------------------------------------------------------------------
 type Content struct {
 	Questions []Question
-	Cases []*Case
 }
