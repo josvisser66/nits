@@ -9,7 +9,7 @@ func displayAnswers(ui *userInterface) {
 	}
 }
 
-func debug(ui *userInterface) {
+func debug(ui *userInterface, content *Content) {
 	ui.pushCommandContext(&CommandContext{
 		Description: "NITS debugger",
 		Commands: []*Command{
@@ -26,6 +26,15 @@ func debug(ui *userInterface) {
 				Help:    "Exits the debugger",
 				Executor: func(strings []string) bool {
 					return true
+				},
+			},
+			{
+				Aliases: []string{"write"},
+				Help:    "Writes the output for trainhmm",
+				Executor: func(strings []string) bool {
+					td, err := writeTrainhmmInput(content)
+					ui.println("Result: %s; %s", td, err)
+					return false
 				},
 			},
 		},

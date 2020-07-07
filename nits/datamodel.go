@@ -157,3 +157,13 @@ func (p *PropertyDamage) GetDirectCauses() []*Cause {
 type Content struct {
 	Questions []Question
 }
+
+func (c *Content) findQuestion(shortName string) Question {
+	for _, q := range c.Questions {
+		if q.getShortName() == shortName {
+			return q
+		}
+	}
+
+	return nil
+}

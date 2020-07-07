@@ -1,6 +1,7 @@
 package nits
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,8 +11,8 @@ import (
 )
 
 const (
-	correct   = 1
-	incorrect = 2
+	correct   = "1"
+	incorrect = "2"
 	separator = "~"
 )
 
@@ -106,4 +107,38 @@ func loadUserData() error {
 	answers = make([]*answer, 0)
 	burnt = make(map[string]interface{})
 	return json.Unmarshal(data, &answers)
+}
+
+// --------------------------------------------------------------------
+func writeTrainhmmInput(content *Content) (string, error) {
+	td, err := ioutil.TempDir("", "nits*")
+	if err != nil {
+		return td, err
+	}
+	var buffer bytes.Buffer
+
+	for _, a := range answers {
+		q := content.findQuestion(a.questionShortName)
+		if q == nil {
+			continue
+		}
+		if a.correct {
+			buffer.WriteString(correct)
+		} else {
+			buffer.WriteString(incorrect)
+		}
+		buffer.WriteString(fmt.Sprintf("\tstudent\t%s\t", a.questionShortName))
+		first := true
+		for _, c := range q.getConcepts() {
+			if !first {
+				buffer.WriteString(separator)
+			} else {
+				first = false
+			}
+			buffer.WriteString(c.shortName)
+		}
+	}
+
+	ioutil.WriteFile(path.Join(td, "input"), buffer.Bytes(), 0644)
+	return td, nil
 }

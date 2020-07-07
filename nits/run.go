@@ -44,7 +44,7 @@ func Run(content *Content) {
 				Global:  true,
 				Help:    "NITS debugging (internal)",
 				Executor: func([]string) bool {
-					debug(ui)
+					debug(ui, content)
 					return false
 				},
 			},
