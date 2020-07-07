@@ -5,6 +5,8 @@ import (
 	"github.com/chzyer/readline"
 	"io"
 	"log"
+	"os"
+	"path"
 	"strings"
 )
 
@@ -94,6 +96,14 @@ func (ui *userInterface) popPrompt() {
 	ui.rl.SetPrompt(ui.promptStack[len(ui.promptStack)-1])
 }
 
+func getUserHomeDir() string {
+	if s, err := os.UserHomeDir(); err != nil {
+		panic(err)
+	} else {
+		return s
+	}
+}
+
 func newUserInterface() *userInterface {
 	var err error
 
@@ -101,7 +111,7 @@ func newUserInterface() *userInterface {
 		promptStack: make([]string, 0, 10),
 	}
 	ui.rl, err = readline.NewEx(&readline.Config{
-		HistoryFile: "/tmp/readline.tmp",
+		HistoryFile: path.Join(getUserHomeDir(), ".nits_readline"),
 		// AutoComplete:    completer,
 		InterruptPrompt: "^C",
 		EOFPrompt:       "exit",

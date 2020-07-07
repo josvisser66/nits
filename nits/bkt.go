@@ -1,8 +1,12 @@
 package nits
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path"
 )
 
 const (
@@ -29,30 +33,77 @@ func initBKT() {
 
 // --------------------------------------------------------------------
 type answer struct {
-	question       Question
-	correct bool
+	questionShortName string
+	correct  bool
 }
 
 var answers = make([]*answer, 0)
 
 func registerAnswer(q Question, correct bool) {
-	answers = append(answers, &answer{q, correct})
-	burn(q)
+	answers = append(answers, &answer{q.getShortName(), correct})
+	burn(q.getShortName())
+}
+
+func (a *answer) MarshalJSON() ([]byte, error) {
+	m := make(map[string]interface{})
+	m["shortName"] = a.questionShortName
+	m["correct"] = a.correct
+
+	return json.Marshal(m)
+}
+
+func (a *answer) UnmarshalJSON(b []byte) error {
+	m := make(map[string]interface{})
+	if err := json.Unmarshal(b, &m); err != nil {
+		return err
+	}
+	if v, ok := m["correct"].(bool); ok {
+		a.correct = v
+	} else {
+		return errors.New("data format error (correct)")
+	}
+	if v, ok := m["shortName"].(string); ok {
+		a.questionShortName = v
+		burn(v)
+	} else {
+		return errors.New("data format error (shortName)")
+	}
+
+	return nil
 }
 
 // --------------------------------------------------------------------
-var burnt = make(map[Question]interface{})
+var burnt = make(map[string]interface{})
 
-func burn(q Question) {
-	burnt[q] = nil
+func burn(shortName string) {
+	burnt[shortName] = nil
 }
 
 func selectQuestion(content *Content) Question {
 	for _, q := range content.Questions {
-		if _, ok := burnt[q]; !ok  {
+		if _, ok := burnt[q.getShortName()]; !ok {
 			return q
 		}
 	}
 
-	panic("No more questions left!")
+	return nil
+}
+
+// --------------------------------------------------------------------
+func saveUserData() error {
+	data, err := json.Marshal(answers)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(path.Join(getUserHomeDir(), ".nits_data"), data, 0644)
+}
+
+func loadUserData() error {
+	data, err := ioutil.ReadFile(path.Join(getUserHomeDir(), ".nits_data"))
+	if err != nil {
+		return err
+	}
+	answers = make([]*answer, 0)
+	burnt = make(map[string]interface{})
+	return json.Unmarshal(data, &answers)
 }

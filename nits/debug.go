@@ -5,7 +5,7 @@ func displayAnswers(ui *userInterface) {
 	ui.newline()
 
 	for _, answer := range answers {
-		ui.println("%5t: %s", answer.correct, answer.question.getShortName())
+		ui.println("%5t: %s", answer.correct, answer.questionShortName)
 	}
 }
 

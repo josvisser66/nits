@@ -30,7 +30,7 @@ func Run(content *Content) {
 		Commands: []*Command{
 			{
 				Aliases: []string{"exit", "quit"},
-				Global: true,
+				Global:  true,
 				Help:    "Exits NITS.",
 				Executor: func(line []string) bool {
 					if ui.yesNo("Are you sure you want to quit") {
@@ -40,11 +40,33 @@ func Run(content *Content) {
 				},
 			},
 			{
-				Aliases:  []string{"debug"},
-				Global: true,
-				Help:     "NITS debugging (internal)",
+				Aliases: []string{"debug"},
+				Global:  true,
+				Help:    "NITS debugging (internal)",
 				Executor: func([]string) bool {
 					debug(ui)
+					return false
+				},
+			},
+			{
+				Aliases: []string{"load"},
+				Global:  true,
+				Help:    "Load user data",
+				Executor: func([]string) bool {
+					if err := loadUserData(); err != nil {
+						ui.println("Loading failed: %s", err)
+					}
+					return false
+				},
+			},
+			{
+				Aliases: []string{"save"},
+				Global:  true,
+				Help:    "Save user data",
+				Executor: func([]string) bool {
+					if err := saveUserData(); err != nil {
+						ui.println("Saving failed: %s", err)
+					}
 					return false
 				},
 			},
@@ -52,21 +74,29 @@ func Run(content *Content) {
 	})
 	defer ui.popCommandContext()
 
+	if err := loadUserData(); err != nil {
+		ui.println("User data *not* loaded: %s", err)
+	} else {
+		ui.println("User data restored.")
+	}
+
+	ui.newline()
+
 	for {
 		selectQuestion(content).ask(ui)
 	}
 }
 
 func (c *Content) check() {
-	checkConcepts()
-	m := make(map[string]interface{})
+checkConcepts()
+m := make(map[string]interface{})
 
-	for _, q := range c.Questions {
-		name := q.getShortName()
-		if _, ok := m[name]; ok {
-			panic(fmt.Sprintf("Duplicate question short name: %s", name))
-		}
-		m[name]=nil
-		q.check()
-	}
+for _, q := range c.Questions {
+name := q.getShortName()
+if _, ok := m[name]; ok {
+panic(fmt.Sprintf("Duplicate question short name: %s", name))
+}
+m[name] = nil
+q.check()
+}
 }
