@@ -29,11 +29,18 @@ func debug(ui *userInterface, content *Content) {
 				},
 			},
 			{
-				Aliases: []string{"write"},
-				Help:    "Writes the output for trainhmm",
+				Aliases: []string{"train"},
+				Help:    "Runs trainhmm",
 				Executor: func(strings []string) bool {
 					td, err := writeTrainhmmInput(content)
-					ui.println("Result: %s; %s", td, err)
+					ui.println("Temporary directory: td=%s; err=%v", td, err)
+					if err != nil {
+						return false
+					}
+					err = runTrainhmm(td)
+					ui.println("Training: err=%v", err)
+					err = readPrediction(td, content, ui)
+					ui.println("Reading predictions: err=%v", err)
 					return false
 				},
 			},

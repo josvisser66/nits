@@ -1,13 +1,17 @@
 package nits
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -35,7 +39,7 @@ func initBKT() {
 // --------------------------------------------------------------------
 type answer struct {
 	questionShortName string
-	correct  bool
+	correct           bool
 }
 
 var answers = make([]*answer, 0)
@@ -139,6 +143,50 @@ func writeTrainhmmInput(content *Content) (string, error) {
 		}
 	}
 
-	ioutil.WriteFile(path.Join(td, "input"), buffer.Bytes(), 0644)
-	return td, nil
+	err = ioutil.WriteFile(path.Join(td, "input"), buffer.Bytes(), 0644)
+	return td, err
+}
+
+func runTrainhmm(td string) error {
+	cmd := exec.Command(
+		trainhmmPath,
+		"-p", "2",
+		"-d", separator,
+		path.Join(td, "input"),
+		path.Join(td, "model.txt"),
+		path.Join(td, "predict.txt"),
+	)
+	_, err := cmd.Output()
+	return err
+}
+
+func readPrediction(td string, content *Content, ui *userInterface) error {
+	file, err := os.Open(path.Join(td, "predict.txt"))
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+
+	for _, a := range answers {
+		q := content.findQuestion(a.questionShortName)
+		if q == nil {
+			continue
+		}
+		if !scanner.Scan() {
+			return errors.New("unexpected end of predict.txt")
+		}
+		words := strings.Split(scanner.Text(), "\t")
+		i := 2
+		ui.println("%s:", q.getShortName())
+		for _, c := range q.getConcepts() {
+			d, err := strconv.ParseFloat(words[i], 64)
+			if err != nil {
+				return err
+			}
+			ui.println("  %s: %l", c.shortName, d)
+		}
+	}
+
+	return scanner.Err()
 }
