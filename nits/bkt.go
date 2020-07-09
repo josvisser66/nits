@@ -42,7 +42,12 @@ type answer struct {
 	correct           bool
 }
 
-var answers = make([]*answer, 0)
+var (
+	answers = make([]*answer, 0)
+	burnt = make(map[string]interface{})
+	concepts = make(map[string]float64)
+)
+
 
 func registerAnswer(q Question, correct bool) {
 	answers = append(answers, &answer{q.getShortName(), correct})
@@ -78,13 +83,14 @@ func (a *answer) UnmarshalJSON(b []byte) error {
 }
 
 // --------------------------------------------------------------------
-var burnt = make(map[string]interface{})
-
 func burn(shortName string) {
 	burnt[shortName] = nil
 }
 
 func selectQuestion(content *Content) Question {
+	if err := train(content); err != nil {
+		panic(fmt.Sprintf("training error: %v", err))
+	}
 	for _, q := range content.Questions {
 		if _, ok := burnt[q.getShortName()]; !ok {
 			return q
@@ -122,24 +128,31 @@ func writeTrainhmmInput(content *Content) (string, error) {
 	var buffer bytes.Buffer
 
 	for _, a := range answers {
+		columns := make([]string, 0)
 		q := content.findQuestion(a.questionShortName)
 		if q == nil {
+			// There is a question in the answer list that is not in the
+			// content.
 			continue
 		}
 		if a.correct {
-			buffer.WriteString(correct)
+			columns = append(columns, correct)
 		} else {
-			buffer.WriteString(incorrect)
+			columns = append(columns, incorrect)
 		}
-		buffer.WriteString(fmt.Sprintf("\tstudent\t%s\t", a.questionShortName))
-		first := true
+		columns = append(columns, "student", a.questionShortName)
+		names := make([]string, 0)
 		for _, c := range q.getConcepts() {
-			if !first {
-				buffer.WriteString(separator)
-			} else {
-				first = false
-			}
-			buffer.WriteString(c.shortName)
+			names = append(names, c.shortName)
+		}
+		columns = append(columns, strings.Join(names, separator))
+		_, err := buffer.WriteString(strings.Join(columns, "\t"))
+		if err != nil {
+			return td, err
+		}
+		_, err = buffer.WriteRune('\n')
+		if  err != nil {
+			return td, err
 		}
 	}
 
@@ -160,7 +173,7 @@ func runTrainhmm(td string) error {
 	return err
 }
 
-func readPrediction(td string, content *Content, ui *userInterface) error {
+func readPrediction(td string, content *Content) error {
 	file, err := os.Open(path.Join(td, "predict.txt"))
 	if err != nil {
 		return err
@@ -178,15 +191,37 @@ func readPrediction(td string, content *Content, ui *userInterface) error {
 		}
 		words := strings.Split(scanner.Text(), "\t")
 		i := 2
-		ui.println("%s:", q.getShortName())
+		d, err := strconv.ParseFloat(words[0], 64)
+		if err != nil {
+			return err
+		}
+		if d == 1.0 {
+			i = 1
+		}
 		for _, c := range q.getConcepts() {
 			d, err := strconv.ParseFloat(words[i], 64)
 			if err != nil {
 				return err
 			}
-			ui.println("  %s: %l", c.shortName, d)
+			concepts[c.shortName] = d
 		}
 	}
 
 	return scanner.Err()
+}
+
+func train(content *Content) error {
+	td, err := writeTrainhmmInput(content)
+	if err != nil {
+		return err
+	}
+	err = runTrainhmm(td)
+	if err != nil {
+		return err
+	}
+	err = readPrediction(td, content)
+	if err != nil {
+		return err
+	}
+	return os.RemoveAll(td)
 }

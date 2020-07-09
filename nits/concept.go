@@ -142,6 +142,7 @@ func initConcepts() {
 
 	for _, c := range allConcepts {
 		c.sortRelatedConcepts()
+		concepts[c.shortName] = 0.0
 	}
 }
 
