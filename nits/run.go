@@ -22,6 +22,7 @@ func Run(content *Content) {
 
 	initBKT()
 	initConcepts()
+	state := newStudentState(content)
 	ui := newUserInterface()
 	defer ui.rl.Close()
 
@@ -34,6 +35,7 @@ func Run(content *Content) {
 				Help:    "Exits NITS.",
 				Executor: func(line []string) bool {
 					if ui.yesNo("Are you sure you want to quit") {
+						state.saveUserData()
 						os.Exit(0)
 					}
 					return false
@@ -44,7 +46,7 @@ func Run(content *Content) {
 				Global:  true,
 				Help:    "NITS debugging (internal)",
 				Executor: func([]string) bool {
-					debug(ui, content)
+					debug(ui, state)
 					return false
 				},
 			},
@@ -53,7 +55,7 @@ func Run(content *Content) {
 				Global:  true,
 				Help:    "Load user data",
 				Executor: func([]string) bool {
-					if err := loadUserData(); err != nil {
+					if err := state.loadUserData(); err != nil {
 						ui.println("Loading failed: %s", err)
 					}
 					return false
@@ -64,7 +66,7 @@ func Run(content *Content) {
 				Global:  true,
 				Help:    "Save user data",
 				Executor: func([]string) bool {
-					if err := saveUserData(); err != nil {
+					if err := state.saveUserData(); err != nil {
 						ui.println("Saving failed: %s", err)
 					}
 					return false
@@ -74,7 +76,7 @@ func Run(content *Content) {
 	})
 	defer ui.popCommandContext()
 
-	if err := loadUserData(); err != nil {
+	if err := state.loadUserData(); err != nil {
 		ui.println("User data *not* loaded: %s", err)
 	} else {
 		ui.println("User data restored.")
@@ -83,20 +85,27 @@ func Run(content *Content) {
 	ui.newline()
 
 	for {
-		selectQuestion(content).ask(ui)
+		if next := state.selectQuestion(); next != nil {
+			next.ask(ui, state)
+		} else {
+			ui.println("We are out of questions!")
+			break
+		}
 	}
+
+	state.saveUserData()
 }
 
 func (c *Content) check() {
-checkConcepts()
-m := make(map[string]interface{})
+	checkConcepts()
+	m := make(map[string]interface{})
 
-for _, q := range c.Questions {
-name := q.getShortName()
-if _, ok := m[name]; ok {
-panic(fmt.Sprintf("Duplicate question short name: %s", name))
-}
-m[name] = nil
-q.check()
-}
+	for _, q := range c.Questions {
+		name := q.getShortName()
+		if _, ok := m[name]; ok {
+			panic(fmt.Sprintf("Duplicate question short name: %s", name))
+		}
+		m[name] = nil
+		q.check()
+	}
 }

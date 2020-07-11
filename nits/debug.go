@@ -1,15 +1,15 @@
 package nits
 
-func displayAnswers(ui *userInterface) {
+func displayAnswers(ui *userInterface, state *studentState) {
 	ui.println("Registered answers:")
 	ui.newline()
 
-	for _, answer := range answers {
+	for _, answer := range state.answers {
 		ui.println("%5t: %s", answer.correct, answer.questionShortName)
 	}
 }
 
-func debug(ui *userInterface, content *Content) {
+func debug(ui *userInterface, state *studentState) {
 	ui.pushCommandContext(&CommandContext{
 		Description: "NITS debugger",
 		Commands: []*Command{
@@ -17,7 +17,7 @@ func debug(ui *userInterface, content *Content) {
 				Aliases: []string{"answers"},
 				Help:    "Displays all registered answers.",
 				Executor: func(strings []string) bool {
-					displayAnswers(ui)
+					displayAnswers(ui, state)
 					return false
 				},
 			},
@@ -32,36 +32,36 @@ func debug(ui *userInterface, content *Content) {
 				Aliases: []string{"train"},
 				Help:    "Runs trainhmm.",
 				Executor: func([]string) bool {
-					td, err := writeTrainhmmInput(content)
+					td, err := state.writeTrainhmmInput()
 					ui.println("Temporary directory: td=%s; err=%v", td, err)
 					if err != nil {
 						return false
 					}
-					err = runTrainhmm(td)
+					err = state.runTrainhmm(td)
 					ui.println("Training: err=%v", err)
-					err = readPrediction(td, content)
+					err = state.readPrediction(td)
 					ui.println("Reading predictions: err=%v", err)
-					for shortName, skillLevel := range concepts {
-						ui.println("%-20s: %f", shortName, skillLevel)
+					for concept, skillLevel := range state.scores {
+						ui.println("%-20s: %f", concept.shortName, skillLevel)
 					}
 					return false
 				},
 			},
 			{
-				Aliases: []string{"concepts"},
-				Help: "Shows all concepts and the student's skill levels.",
+				Aliases: []string{"scores"},
+				Help:    "Shows all concepts and the student's skill levels.",
 				Executor: func([]string) bool {
-					for shortName, skillLevel := range concepts {
-						ui.println("%-20s: %f", shortName, skillLevel)
+					for concept, skillLevel := range state.scores {
+						ui.println("%-20s: %f", concept.shortName, skillLevel)
 					}
 					return false
 				},
 			},
 			{
 				Aliases: []string{"dot"},
-				Help: "Generates dot file for content and concepts.",
+				Help:    "Generates dot file for content and concepts.",
 				Executor: func([]string) bool {
-					fname, err := makeDot(content, ui.yesNo("Augment concepts with skill level ratios"))
+					fname, err := makeDot(state, ui.yesNo("Augment concepts with skill level ratios"))
 					if err != nil {
 						ui.println("error: %s", err)
 					} else {

@@ -7,7 +7,7 @@ import (
 
 // --------------------------------------------------------------------
 type Question interface {
-	ask(ui *userInterface)
+	ask(ui *userInterface, state *studentState)
 	getConcepts() []*Concept
 	getAllConcepts() []*Concept
 	getShortName() string
@@ -44,6 +44,10 @@ func (q *MultipleChoiceQuestion) check() {
 
 	if n == 0 {
 		panic(fmt.Sprintf("Question %s does not have any correct answers!", q.ShortName))
+	}
+
+	if q.Concepts == nil || len(q.Concepts) == 0 {
+		panic(fmt.Sprintf("Question %s does not have any concepts!", q.ShortName))
 	}
 }
 
@@ -95,7 +99,7 @@ func pushCommandContext(ui *userInterface, q Question, displayQuestion func([]st
 	})
 }
 
-func (q *MultipleChoiceQuestion) ask(ui *userInterface) {
+func (q *MultipleChoiceQuestion) ask(ui *userInterface, state *studentState) {
 	answers := make([]*Answer, len(q.Answers))
 	copy(answers, q.Answers)
 	rand.Shuffle(len(answers), func(i, j int) {
@@ -133,7 +137,7 @@ func (q *MultipleChoiceQuestion) ask(ui *userInterface) {
 		}
 		if answers[answer].Correct {
 			ui.println("Correct :-)")
-			registerAnswer(q, attempts == 0)
+			state.registerAnswer(q, attempts == 0)
 			return
 		}
 		ui.println("Incorrect :-(")
@@ -158,6 +162,10 @@ func (q *PropsQuestion) getShortName() string {
 }
 
 func (q *PropsQuestion) check() {
+	if len(q.getConcepts()) == 0 {
+		panic(fmt.Sprintf("Question %s does not have any concepts!", q.ShortName))
+	}
+
 	if len(q.Propositions) < 2 {
 		panic(fmt.Sprintf("Question %s does not have at least 2 propositions"))
 	}
@@ -206,7 +214,7 @@ func romanNumeral(number int) string {
 	return roman
 }
 
-func (q *PropsQuestion) ask(ui *userInterface) {
+func (q *PropsQuestion) ask(ui *userInterface, state *studentState) {
 	displayQuestion := func([]string) bool {
 		ui.println("Consider the following propositions:")
 		ui.newline()
@@ -276,7 +284,7 @@ outer:
 			answer >>= 1
 		}
 		ui.println("Correct :-)")
-		registerAnswer(q, attempts == 0)
+		state.registerAnswer(q, attempts == 0)
 		return
 	}
 }

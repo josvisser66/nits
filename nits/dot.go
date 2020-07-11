@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 )
 
-func makeDot(content *Content, withSkills bool) (string, error) {
+func makeDot(state *studentState, withSkills bool) (string, error) {
 	f, err := ioutil.TempFile("", "nits*.dot")
 	if err != nil {
 		return "", err
@@ -19,7 +19,7 @@ func makeDot(content *Content, withSkills bool) (string, error) {
 
 	for _, c := range allConcepts {
 		if withSkills {
-			_, err = f.WriteString(fmt.Sprintf("\t%s [label=\"%s (%f)\"];\n", c.shortName, c.shortName, concepts[c.shortName]))
+			_, err = f.WriteString(fmt.Sprintf("\t%s [label=\"%s (%f)\"];\n", c.shortName, c.shortName, state.scores[c]))
 		} else {
 			_, err = f.WriteString(fmt.Sprintf("\t%s;\n", c.shortName))
 		}
@@ -28,7 +28,7 @@ func makeDot(content *Content, withSkills bool) (string, error) {
 		}
 	}
 
-	for _, q := range content.Questions {
+	for _, q := range state.content.Questions {
 		_, err = f.WriteString(fmt.Sprintf("\t%s [shape=box];\n", q.getShortName()))
 		for _, rc := range q.getAllConcepts() {
 			_, err = f.WriteString(fmt.Sprintf("\t%s -> %s;\n", q.getShortName(), rc.shortName))

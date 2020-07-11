@@ -38,20 +38,33 @@ func initBKT() {
 
 // --------------------------------------------------------------------
 type answer struct {
-	questionShortName string
+	questionShortName string // Here because of JSON unmarshaling.
+	question          Question
 	correct           bool
 }
 
-var (
-	answers = make([]*answer, 0)
-	burnt = make(map[string]interface{})
-	concepts = make(map[string]float64)
-)
+type studentState struct {
+	answers []*answer
+	burnt   map[Question]interface{} // A set, basically.
+	scores  map[*Concept]float64
+	content *Content
+}
 
+func newStudentState(content *Content) *studentState {
+	return &studentState{
+		answers: make([]*answer, 0),
+		burnt:   make(map[Question]interface{}),
+		scores:  make(map[*Concept]float64),
+		content: content,
+	}
+}
 
-func registerAnswer(q Question, correct bool) {
-	answers = append(answers, &answer{q.getShortName(), correct})
-	burn(q.getShortName())
+func (s *studentState) registerAnswer(q Question, correct bool) {
+	s.answers = append(s.answers, &answer{
+		questionShortName: q.getShortName(),
+		question:          q,
+		correct:           correct})
+	s.burnt[q] = nil
 }
 
 func (a *answer) MarshalJSON() ([]byte, error) {
@@ -74,7 +87,6 @@ func (a *answer) UnmarshalJSON(b []byte) error {
 	}
 	if v, ok := m["shortName"].(string); ok {
 		a.questionShortName = v
-		burn(v)
 	} else {
 		return errors.New("data format error (shortName)")
 	}
@@ -82,17 +94,12 @@ func (a *answer) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// --------------------------------------------------------------------
-func burn(shortName string) {
-	burnt[shortName] = nil
-}
-
-func selectQuestion(content *Content) Question {
-	if err := train(content); err != nil {
+func (s *studentState) selectQuestion() Question {
+	if err := s.train(); err != nil {
 		panic(fmt.Sprintf("training error: %v", err))
 	}
-	for _, q := range content.Questions {
-		if _, ok := burnt[q.getShortName()]; !ok {
+	for _, q := range s.content.Questions {
+		if _, ok := s.burnt[q]; !ok {
 			return q
 		}
 	}
@@ -101,35 +108,46 @@ func selectQuestion(content *Content) Question {
 }
 
 // --------------------------------------------------------------------
-func saveUserData() error {
-	data, err := json.Marshal(answers)
+func (s *studentState) saveUserData() error {
+	data, err := json.MarshalIndent(s.answers, "", "\t")
 	if err != nil {
 		return err
 	}
 	return ioutil.WriteFile(path.Join(getUserHomeDir(), ".nits_data"), data, 0644)
 }
 
-func loadUserData() error {
+func (s *studentState) loadUserData() error {
 	data, err := ioutil.ReadFile(path.Join(getUserHomeDir(), ".nits_data"))
 	if err != nil {
 		return err
 	}
-	answers = make([]*answer, 0)
-	burnt = make(map[string]interface{})
-	return json.Unmarshal(data, &answers)
+	s.answers = make([]*answer, 0)
+	s.burnt = make(map[Question]interface{})
+	if err := json.Unmarshal(data, &s.answers); err != nil {
+		return err
+	}
+
+	for _, a := range s.answers {
+		a.question = s.content.findQuestion(a.questionShortName)
+		if a.question != nil {
+			s.burnt[a.question] = nil
+		}
+	}
+
+	return nil
 }
 
 // --------------------------------------------------------------------
-func writeTrainhmmInput(content *Content) (string, error) {
+func (s *studentState) writeTrainhmmInput() (string, error) {
 	td, err := ioutil.TempDir("", "nits*")
 	if err != nil {
 		return td, err
 	}
 	var buffer bytes.Buffer
 
-	for _, a := range answers {
+	for _, a := range s.answers {
 		columns := make([]string, 0)
-		q := content.findQuestion(a.questionShortName)
+		q := s.content.findQuestion(a.questionShortName)
 		if q == nil {
 			// There is a question in the answer list that is not in the
 			// content.
@@ -151,7 +169,7 @@ func writeTrainhmmInput(content *Content) (string, error) {
 			return td, err
 		}
 		_, err = buffer.WriteRune('\n')
-		if  err != nil {
+		if err != nil {
 			return td, err
 		}
 	}
@@ -160,7 +178,7 @@ func writeTrainhmmInput(content *Content) (string, error) {
 	return td, err
 }
 
-func runTrainhmm(td string) error {
+func (s *studentState) runTrainhmm(td string) error {
 	cmd := exec.Command(
 		trainhmmPath,
 		"-p", "2",
@@ -173,7 +191,7 @@ func runTrainhmm(td string) error {
 	return err
 }
 
-func readPrediction(td string, content *Content) error {
+func (s *studentState) readPrediction(td string) error {
 	file, err := os.Open(path.Join(td, "predict.txt"))
 	if err != nil {
 		return err
@@ -181,9 +199,8 @@ func readPrediction(td string, content *Content) error {
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
 
-	for _, a := range answers {
-		q := content.findQuestion(a.questionShortName)
-		if q == nil {
+	for _, a := range s.answers {
+		if a.question == nil {
 			continue
 		}
 		if !scanner.Scan() {
@@ -198,28 +215,28 @@ func readPrediction(td string, content *Content) error {
 		if d == 1.0 {
 			i = 1
 		}
-		for _, c := range q.getConcepts() {
+		for _, c := range a.question.getConcepts() {
 			d, err := strconv.ParseFloat(words[i], 64)
 			if err != nil {
 				return err
 			}
-			concepts[c.shortName] = d
+			s.scores[c] = d
 		}
 	}
 
 	return scanner.Err()
 }
 
-func train(content *Content) error {
-	td, err := writeTrainhmmInput(content)
+func (s *studentState) train() error {
+	td, err := s.writeTrainhmmInput()
 	if err != nil {
 		return err
 	}
-	err = runTrainhmm(td)
+	err = s.runTrainhmm(td)
 	if err != nil {
 		return err
 	}
-	err = readPrediction(td, content)
+	err = s.readPrediction(td)
 	if err != nil {
 		return err
 	}

@@ -34,6 +34,7 @@ func GetContent() *Content {
 			},
 			&MultipleChoiceQuestion{
 				ShortName: "mc_pure_compneg1",
+				Concepts:  []*Concept{PureComparativeNegligence},
 				Question: []string{
 					"Assume that the state of East Delaware has a statute under which Ellen would recover $60,000 " +
 						"of her $300,000 in damages because a jury found her to be 80%% negligent in the accident " +
@@ -66,6 +67,7 @@ func GetContent() *Content {
 			},
 			&MultipleChoiceQuestion{
 				ShortName: "mc_mrbean_contribneg1",
+				Concepts: []*Concept{ContributoryNegligence},
 				Question: []string{
 					"In response to a number of accidents involving pedestrians, a city enacted a statute making it " +
 						"illegal to walk through the business district other than on the sidewalk. The city also " +
