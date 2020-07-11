@@ -1,38 +1,37 @@
 package nits
 
 import (
-	"fmt"
 	"math/rand"
 )
 
 // --------------------------------------------------------------------
 type Question interface {
-	ask(ui *userInterface, state *studentState)
-	getConcepts() []*Concept
-	getAllConcepts() []*Concept
 	getShortName() string
+	getConcepts() []*Concept
+	getTrainingConcepts() []*Concept
 	check()
+	ask(ui *userInterface, state *studentState)
 }
 
 // --------------------------------------------------------------------
 type Answer struct {
-	Text        string
-	Concepts    []*Concept
-	Explanation Explanation
-	Correct     bool
+	Text           string
+	Concepts       []*Concept
+	Explanation    Explanation
+	Correct        bool
+	NoneOfTheAbove bool
 }
 
 type MultipleChoiceQuestion struct {
 	ShortName string
-	Question []string
-	Concepts []*Concept
-	Answers  []*Answer
+	Question  []string
+	Concepts  []*Concept
+	Answers   []*Answer
 }
 
 func (q *MultipleChoiceQuestion) check() {
-	if len(q.Answers) < 2 {
-		panic(fmt.Sprintf("Question %s does not have at least two answers", q.ShortName))
-	}
+	CHECK(len(q.Answers) >= 2, "Question %s does not have at least two answers", q.ShortName)
+	CHECK(len(q.getConcepts()) > 0, "Question %s does not have any concepts!", q.ShortName)
 
 	n := 0
 
@@ -42,13 +41,7 @@ func (q *MultipleChoiceQuestion) check() {
 		}
 	}
 
-	if n == 0 {
-		panic(fmt.Sprintf("Question %s does not have any correct answers!", q.ShortName))
-	}
-
-	if q.Concepts == nil || len(q.Concepts) == 0 {
-		panic(fmt.Sprintf("Question %s does not have any concepts!", q.ShortName))
-	}
+	CHECK(n > 0, "Question %s does not have any correct answers!", q.ShortName)
 }
 
 func (q *MultipleChoiceQuestion) getShortName() string {
@@ -56,12 +49,6 @@ func (q *MultipleChoiceQuestion) getShortName() string {
 }
 
 func (q *MultipleChoiceQuestion) getConcepts() []*Concept {
-	return q.Concepts
-}
-
-// getAllConcepts returns all the concepts that are directly implicated
-// in the question or its answers.
-func (q *MultipleChoiceQuestion) getAllConcepts() []*Concept {
 	m := make(map[*Concept]interface{})
 
 	for _, c := range q.Concepts {
@@ -71,6 +58,25 @@ func (q *MultipleChoiceQuestion) getAllConcepts() []*Concept {
 	for _, a := range q.Answers {
 		for _, c := range a.Concepts {
 			m[c] = nil
+		}
+	}
+
+	return conceptMapToSlice(m)
+}
+
+func (q *MultipleChoiceQuestion) getTrainingConcepts() []*Concept {
+	m := make(map[*Concept]interface{})
+
+	for _, c := range q.Concepts {
+		m[c] = nil
+	}
+
+	for _, a := range q.Answers {
+		if a.Correct {
+			for _, c := range a.Concepts {
+				m[c] = nil
+			}
+			break
 		}
 	}
 
@@ -100,11 +106,21 @@ func pushCommandContext(ui *userInterface, q Question, displayQuestion func([]st
 }
 
 func (q *MultipleChoiceQuestion) ask(ui *userInterface, state *studentState) {
-	answers := make([]*Answer, len(q.Answers))
-	copy(answers, q.Answers)
+	answers := make([]*Answer, 0, len(q.Answers))
+	var noneOfTheAbove *Answer
+	for _, a := range q.Answers {
+		if a.NoneOfTheAbove {
+			noneOfTheAbove = a
+		} else {
+			answers = append(answers, a)
+		}
+	}
 	rand.Shuffle(len(answers), func(i, j int) {
 		answers[i], answers[j] = answers[j], answers[i]
 	})
+	if noneOfTheAbove != nil {
+		answers = append(answers, noneOfTheAbove)
+	}
 	displayQuestion := func([]string) bool {
 		ui.printParagraphs(q.Question)
 		ui.newline()
@@ -153,7 +169,7 @@ type Proposition struct {
 }
 
 type PropsQuestion struct {
-	ShortName string
+	ShortName    string
 	Propositions []*Proposition
 }
 
@@ -162,13 +178,9 @@ func (q *PropsQuestion) getShortName() string {
 }
 
 func (q *PropsQuestion) check() {
-	if len(q.getConcepts()) == 0 {
-		panic(fmt.Sprintf("Question %s does not have any concepts!", q.ShortName))
-	}
-
-	if len(q.Propositions) < 2 {
-		panic(fmt.Sprintf("Question %s does not have at least 2 propositions"))
-	}
+	CHECK(q.ShortName != "", "Proposition question does not have a short name (%s)", q.Propositions[0].Proposition)
+	CHECK(len(q.getConcepts()) > 0, "Question %s does not have any concepts!", q.ShortName)
+	CHECK(len(q.Propositions) >= 2, "Question %s does not have at least 2 propositions", q.ShortName)
 }
 
 func (q *PropsQuestion) getConcepts() []*Concept {
@@ -181,6 +193,10 @@ func (q *PropsQuestion) getConcepts() []*Concept {
 	}
 
 	return conceptMapToSlice(m)
+}
+
+func (q *PropsQuestion) getTrainingConcepts() []*Concept {
+	return q.getConcepts()
 }
 
 // https://codereview.stackexchange.com/questions/202352/int-to-roman-numerals-in-go-golang
@@ -287,12 +303,6 @@ outer:
 		state.registerAnswer(q, attempts == 0)
 		return
 	}
-}
-
-// getAllConcepts returns all the concepts that are directly implicated
-// in the question or its answers.
-func (q *PropsQuestion) getAllConcepts() []*Concept {
-	return q.getConcepts()
 }
 
 // --------------------------------------------------------------------

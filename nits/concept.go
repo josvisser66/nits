@@ -112,7 +112,71 @@ var (
 					"or regulation sought to protect.",
 			},
 			References: []Reference{
-				&Restatement{288},
+				&Restatement{"288"},
+			},
+		},
+	}).add()
+	ResIpsaLoquitur = (&Concept{
+			name:      "res ipsa loquitur",
+			shortName: "resipsa",
+			level:     1,
+			explanation: &Explanation{
+				Text: []string{
+					"Res ipsa Loquitur: The thing speaks for itself.",
+					"The doctrine of res ipsa loquitur can be called in when, even though it is not exactly " +
+						"known what happened it is obvious that something negligent happened. The doctrinal " +
+						"example is a sack of flour falling from above and landing on someone's head.",
+				},
+			},
+		}).add()
+	VicariousLiability = (&Concept{
+		name:        "vicarious liability",
+		shortName:   "vicliab",
+		level:       1,
+		explanation: &Explanation{
+			Text: []string{
+				"Vicarious liability is a legal doctrine whereby a person who is not personally at fault is " +
+					"legally required to bear the burden of another's tortious wrongdoing.",
+			},
+		},
+	}).add()
+	PunitiveDamages = (&Concept{
+		name: "punitive damages",
+		shortName: "pundam",
+		level: 1,
+		explanation: &Explanation{
+			Text: []string{
+				"Punitive damages (as opposed to compensatory damages) are designed to prevent others from "+
+					"being hurt by the same or similar actions.",
+			},
+		},
+	}).add()
+	EconomicDamages = (&Concept{
+		name:        "economic damages",
+		shortName:   "ecodam",
+		level:       1,
+		explanation: &Explanation{
+			Text:[]string{
+				"Economic damages are compensation you receive as a result of monetary losses you suffer " +
+					"because of an accident.",
+			},
+		},
+	}).add()
+	CollateralSourcePayments = (&Concept{
+		name:        "collateral source payments",
+		shortName:   "collsrcpay",
+		level:       1,
+		explanation: &Explanation{
+			Text:[]string{
+				"Collateral source payments are payments a plaintiff might receive from for instance an "+
+					"insurance company for part or all of the damages. The Collateral Source Rule states " +
+					"that no evidence of collateral source payments may be introduced to the jury. Because "+
+					"of this these payments do not reduce the liability for the tortfeasor. Many states have "+
+					"abrogated this rule by statute.",
+			},
+			References: []Reference{
+				&Restatement{"920A"},
+				&URL{"https://www.claimsjournal.com/news/national/2018/01/11/282417.htm"},
 			},
 		},
 	}).add()

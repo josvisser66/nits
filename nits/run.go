@@ -109,3 +109,9 @@ func (c *Content) check() {
 		q.check()
 	}
 }
+
+func CHECK(b bool, s string, args ...interface{}) {
+	if !b {
+		panic(fmt.Sprintf(s, args...))
+	}
+}

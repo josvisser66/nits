@@ -8,7 +8,7 @@ import (
 var active bool
 
 type ConceptBucket interface {
-	getAllConcepts() []*Concept
+	getConcepts() []*Concept
 }
 
 func findConcept(concepts []*Concept, name string) *Concept {
@@ -40,7 +40,7 @@ func ExploreConcepts(ui *userInterface, b ConceptBucket) {
 	active = true
 	defer func() { active = false }()
 
-	concepts := b.getAllConcepts()
+	concepts := b.getConcepts()
 
 	showConcepts := func([]string) bool {
 		for i, c := range concepts {

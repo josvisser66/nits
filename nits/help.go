@@ -22,11 +22,11 @@ type Explanation struct {
 }
 
 type Restatement struct {
-	Paragraph int
+	Paragraph string
 }
 
 func (r *Restatement) GetReferenceText() string {
-	return fmt.Sprintf("Restatement, Second, Torts, §%d", r.Paragraph)
+	return fmt.Sprintf("Restatement, Second, Torts, §%s", r.Paragraph)
 }
 
 type URL struct {

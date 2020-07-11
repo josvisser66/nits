@@ -17,7 +17,7 @@ func GetContent() *Content {
 						Concepts: []*Concept{PreponderanceOfTheElements},
 					},
 					{
-						Text: "The defendant's behavior was virtually certain to inflict a loss on the plaintiff.",
+						Text:    "The defendant's behavior was virtually certain to inflict a loss on the plaintiff.",
 						Correct: true,
 					},
 					{
@@ -29,6 +29,7 @@ func GetContent() *Content {
 					},
 					{
 						Text: "None of the above.",
+						NoneOfTheAbove: true,
 					},
 				},
 			},
@@ -67,7 +68,7 @@ func GetContent() *Content {
 			},
 			&MultipleChoiceQuestion{
 				ShortName: "mc_mrbean_contribneg1",
-				Concepts: []*Concept{ContributoryNegligence},
+				Concepts:  []*Concept{ContributoryNegligence},
 				Question: []string{
 					"In response to a number of accidents involving pedestrians, a city enacted a statute making it " +
 						"illegal to walk through the business district other than on the sidewalk. The city also " +
@@ -108,6 +109,88 @@ func GetContent() *Content {
 					{
 						Proposition: "Under comparative negligence, if you contribute to your injury, you cannot recover damages.",
 						Concepts:    []*Concept{ComparativeNegligence},
+					},
+				},
+			},
+			&MultipleChoiceQuestion{
+				ShortName: "mc_amanda_surgery",
+				Question: []string{
+					"Amanda needed surgery on her right knee. When the anesthesia wore off after " +
+						"the operation, she noticed surgical wrapping around both knees. When she asked " +
+						"the nurse why both knees were wrapped, the nurse replied that the surgeon made " +
+						"an incision on her left knee, discovered the mistake, and proceeded with the " +
+						"operation on the right knee. What modification of the law of negligence will " +
+						"Amanda probably be able to invoke to recover damages from the surgeon?",
+				},
+				Concepts: nil,
+				Answers: []*Answer{
+					{
+						Text:     "Contributory negligence",
+						Concepts: []*Concept{ContributoryNegligence},
+					},
+					{
+						Text:     "Negligence per se",
+						Concepts: []*Concept{NegligencePerSe},
+					},
+					{
+						Text:     "Res ipsa loquitur",
+						Concepts: []*Concept{ResIpsaLoquitur},
+						Correct:  true,
+					},
+					{
+						Text:     "Comparative negligence",
+						Concepts: []*Concept{ComparativeNegligence},
+					},
+				},
+			},
+			&MultipleChoiceQuestion{
+				ShortName: "mc_defense_liability_claims",
+				Question:  []string{"All of the following are legal defenses to liability claims EXCEPT:"},
+				Answers: []*Answer{
+					{
+						Text: "Contributory negligence",
+						Concepts: []*Concept{ContributoryNegligence},
+					},
+					{
+						Text: "Assumption of the risk",
+						Concepts: []*Concept{AssumptionOfRisk},
+					},
+					{
+						Text: "Vicarious liability",
+						Concepts: []*Concept{VicariousLiability},
+						Correct: true,
+					},
+					{
+						Text: "Comparative negligence",
+						Concepts: []*Concept{ComparativeNegligence},
+					},
+				},
+			},
+			&MultipleChoiceQuestion{
+				ShortName: "mc_managed_care",
+				Question:  []string{
+					"A managed care company was found liable for denying valid claims for health "+
+					"insurance coverage. The company was ordered to pay compensatory damages to "+
+					"a group of plaintiffs. To make an example of the insurer, the court also "+
+					"ordered the insurer to pay an additional $10 million to deter other insurers from "+
+					"engaging in the same wrongful acts. The $10 million award is an example of:",
+				},
+				Answers:   []*Answer{
+					{
+						Text: "Punitive damages",
+						Concepts: []*Concept{PunitiveDamages},
+						Correct: true,
+					},
+					{
+						Text: "Economic damages",
+						Concepts: []*Concept{EconomicDamages},
+					},
+					{
+						Text: "Non-economic damages",
+					},
+					{
+						Text: "Collateral source payments",
+						Concepts: []*Concept{CollateralSourcePayments},
 					},
 				},
 			},

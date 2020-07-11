@@ -30,7 +30,7 @@ func makeDot(state *studentState, withSkills bool) (string, error) {
 
 	for _, q := range state.content.Questions {
 		_, err = f.WriteString(fmt.Sprintf("\t%s [shape=box];\n", q.getShortName()))
-		for _, rc := range q.getAllConcepts() {
+		for _, rc := range q.getConcepts() {
 			_, err = f.WriteString(fmt.Sprintf("\t%s -> %s;\n", q.getShortName(), rc.shortName))
 		}
 	}

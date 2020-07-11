@@ -160,7 +160,7 @@ func (s *studentState) writeTrainhmmInput() (string, error) {
 		}
 		columns = append(columns, "student", a.questionShortName)
 		names := make([]string, 0)
-		for _, c := range q.getConcepts() {
+		for _, c := range q.getTrainingConcepts() {
 			names = append(names, c.shortName)
 		}
 		columns = append(columns, strings.Join(names, separator))
@@ -215,7 +215,7 @@ func (s *studentState) readPrediction(td string) error {
 		if d == 1.0 {
 			i = 1
 		}
-		for _, c := range a.question.getConcepts() {
+		for _, c := range a.question.getTrainingConcepts() {
 			d, err := strconv.ParseFloat(words[i], 64)
 			if err != nil {
 				return err
@@ -228,6 +228,9 @@ func (s *studentState) readPrediction(td string) error {
 }
 
 func (s *studentState) train() error {
+	if len(s.answers) == 0 {
+		return nil
+	}
 	td, err := s.writeTrainhmmInput()
 	if err != nil {
 		return err
