@@ -1,5 +1,21 @@
 package nits
 
+var (
+	trace *tracer
+)
+
+type tracer struct {
+	ui *userInterface
+}
+
+func (t *tracer) print(s string, args ...interface{}) {
+	t.ui.print(s, args...)
+}
+
+func (t *tracer) println(s string, args ...interface{}) {
+	t.ui.println(s, args...)
+}
+
 func displayAnswers(ui *userInterface, state *studentState) {
 	ui.println("Registered answers:")
 	ui.newline()
@@ -66,6 +82,39 @@ func debug(ui *userInterface, state *studentState) {
 						ui.println("error: %s", err)
 					} else {
 						ui.println("now run: dot -Tpdf %s >/tmp/aap.pdf", fname)
+					}
+					return false
+				},
+			},
+			{
+				Aliases: []string{"trace"},
+				Help:    "Switching detail tracing on or off",
+				Executor: func(words []string) bool {
+					state := "on"
+					if len(words) == 1 {
+						if trace == nil {
+							state = "off"
+						}
+					} else if words[1] == "on" {
+						trace = &tracer{ui}
+					} else if words[1] == "off" {
+						trace = nil
+						state = "off"
+					} else {
+						ui.println("on or off, please")
+						return false
+					}
+					ui.println("tracing is %s", state)
+					return false
+				},
+			},
+			{
+				Aliases:  []string{"select"},
+				Help:     "Run the question selection algorithm",
+				Executor: func([]string) bool {
+					q :=state.selectQuestion()
+					if q == nil {
+						ui.println("No question selected!")
 					}
 					return false
 				},

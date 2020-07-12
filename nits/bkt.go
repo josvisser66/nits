@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -18,6 +19,7 @@ const (
 	correct   = "1"
 	incorrect = "2"
 	separator = "~"
+	threshold = 0.9
 )
 
 var trainhmmPath = "/Users/josv/standard-bkt/trainhmm"
@@ -94,20 +96,6 @@ func (a *answer) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (s *studentState) selectQuestion() Question {
-	if err := s.train(); err != nil {
-		panic(fmt.Sprintf("training error: %v", err))
-	}
-	for _, q := range s.content.Questions {
-		if _, ok := s.burnt[q]; !ok {
-			return q
-		}
-	}
-
-	return nil
-}
-
-// --------------------------------------------------------------------
 func (s *studentState) saveUserData() error {
 	data, err := json.MarshalIndent(s.answers, "", "\t")
 	if err != nil {
@@ -245,3 +233,49 @@ func (s *studentState) train() error {
 	}
 	return os.RemoveAll(td)
 }
+
+// --------------------------------------------------------------------
+func (s *studentState) avg(q Question) float64 {
+	total := 0.0
+	concepts := q.getTrainingConcepts()
+	for _, c := range concepts {
+		total += s.scores[c]
+	}
+	return total / float64(len(concepts))
+}
+
+func (s *studentState) selectQuestion() Question {
+	if err := s.train(); err != nil {
+		panic(fmt.Sprintf("training error: %v", err))
+	}
+	possibles := make([]Question, 0)
+	for _, q := range s.content.Questions {
+		if _, ok := s.burnt[q]; ok {
+			continue
+		}
+		for _, c := range q.getTrainingConcepts() {
+			if s.scores[c] < threshold {
+				possibles = append(possibles, q)
+				break
+			}
+		}
+	}
+	if len(possibles) == 0 {
+		return nil
+	}
+	sort.Slice(possibles, func(i, j int) bool {
+		return s.avg(possibles[i]) > s.avg(possibles[j])
+	})
+	if trace != nil {
+		for _, q := range possibles {
+			trace.print("%32s", q.getShortName())
+			for _, c := range q.getTrainingConcepts() {
+				trace.print("%20s(%f)", c.shortName, s.scores[c])
+			}
+			trace.println("  avg=%f", s.avg(q))
+		}
+	}
+	return possibles[0]
+}
+
+

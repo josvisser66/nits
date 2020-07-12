@@ -28,7 +28,7 @@ func GetContent() *Content {
 						Text: "The defendant's behavior was more likely than not to inflict a loss on the plaintiff.",
 					},
 					{
-						Text: "None of the above.",
+						Text:           "None of the above.",
 						NoneOfTheAbove: true,
 					},
 				},
@@ -148,49 +148,74 @@ func GetContent() *Content {
 				Question:  []string{"All of the following are legal defenses to liability claims EXCEPT:"},
 				Answers: []*Answer{
 					{
-						Text: "Contributory negligence",
+						Text:     "Contributory negligence",
 						Concepts: []*Concept{ContributoryNegligence},
 					},
 					{
-						Text: "Assumption of the risk",
+						Text:     "Assumption of the risk",
 						Concepts: []*Concept{AssumptionOfRisk},
 					},
 					{
-						Text: "Vicarious liability",
+						Text:     "Vicarious liability",
 						Concepts: []*Concept{VicariousLiability},
-						Correct: true,
+						Correct:  true,
 					},
 					{
-						Text: "Comparative negligence",
+						Text:     "Comparative negligence",
 						Concepts: []*Concept{ComparativeNegligence},
 					},
 				},
 			},
 			&MultipleChoiceQuestion{
 				ShortName: "mc_managed_care",
-				Question:  []string{
-					"A managed care company was found liable for denying valid claims for health "+
-					"insurance coverage. The company was ordered to pay compensatory damages to "+
-					"a group of plaintiffs. To make an example of the insurer, the court also "+
-					"ordered the insurer to pay an additional $10 million to deter other insurers from "+
-					"engaging in the same wrongful acts. The $10 million award is an example of:",
+				Question: []string{
+					"A managed care company was found liable for denying valid claims for health " +
+						"insurance coverage. The company was ordered to pay compensatory damages to " +
+						"a group of plaintiffs. To make an example of the insurer, the court also " +
+						"ordered the insurer to pay an additional $10 million to deter other insurers from " +
+						"engaging in the same wrongful acts. The $10 million award is an example of:",
 				},
-				Answers:   []*Answer{
+				Answers: []*Answer{
 					{
-						Text: "Punitive damages",
+						Text:     "Punitive damages",
 						Concepts: []*Concept{PunitiveDamages},
-						Correct: true,
+						Correct:  true,
 					},
 					{
-						Text: "Economic damages",
+						Text:     "Economic damages",
 						Concepts: []*Concept{EconomicDamages},
 					},
 					{
 						Text: "Non-economic damages",
 					},
 					{
-						Text: "Collateral source payments",
+						Text:     "Collateral source payments",
 						Concepts: []*Concept{CollateralSourcePayments},
+					},
+				},
+			},
+			&MultipleChoiceQuestion{
+				ShortName: "mc_pure_compneg2",
+				Question: []string{
+					"Bruce was involved in an accident in a state that uses a pure comparative " +
+						"negligence rule. Bruce was found to be 75 percent responsible for the accident. " +
+						"His actual damages were $20,000. How much will Bruce be able to recover from the " +
+						"defendant?",
+				},
+				Concepts: []*Concept{PureComparativeNegligence},
+				Answers: []*Answer{
+					{
+						Text: "$0",
+					},
+					{
+						Text:"$5,000",
+						Correct: true,
+					},
+					{
+						Text:"$15,000",
+					},
+					{
+						Text: "$20,000",
 					},
 				},
 			},
