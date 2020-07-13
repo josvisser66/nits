@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path"
@@ -263,6 +264,9 @@ func (s *studentState) selectQuestion() Question {
 	if len(possibles) == 0 {
 		return nil
 	}
+	rand.Shuffle(len(possibles), func(i, j int) {
+		possibles[i], possibles[j] = possibles[j], possibles[i]
+	})
 	sort.Slice(possibles, func(i, j int) bool {
 		return s.avg(possibles[i]) > s.avg(possibles[j])
 	})
