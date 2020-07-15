@@ -83,7 +83,7 @@ func (q *MultipleChoiceQuestion) getTrainingConcepts() []*Concept {
 	return conceptMapToSlice(m)
 }
 
-func pushCommandContext(ui *userInterface, q Question, displayQuestion func([]string) bool) {
+func pushCommandContext(state *studentState, ui *userInterface, q Question, displayQuestion func([]string) bool) {
 	ui.pushCommandContext(&CommandContext{
 		Description: "Answering a multiple choice question",
 		Commands: []*Command{
@@ -99,6 +99,14 @@ func pushCommandContext(ui *userInterface, q Question, displayQuestion func([]st
 				Executor: func([]string) bool {
 					ExploreConcepts(ui, q)
 					return false
+				},
+			},
+			{
+				Aliases: []string{"burn"},
+				Help:    "Burn this question.",
+				Executor: func([]string) bool {
+					state.burn(q)
+					return true
 				},
 			},
 		},
@@ -131,7 +139,7 @@ func (q *MultipleChoiceQuestion) ask(ui *userInterface, state *studentState) {
 
 	displayQuestion(nil)
 	ui.pushPrompt("Your answer? ")
-	pushCommandContext(ui, q, displayQuestion)
+	pushCommandContext(state, ui, q, displayQuestion)
 	defer ui.popPrompt()
 	defer ui.popCommandContext()
 
@@ -271,7 +279,7 @@ func (q *PropsQuestion) ask(ui *userInterface, state *studentState) {
 
 	displayQuestion(nil)
 	ui.pushPrompt("Your answer? ")
-	pushCommandContext(ui, q, displayQuestion)
+	pushCommandContext(state, ui, q, displayQuestion)
 	defer ui.popPrompt()
 	defer ui.popCommandContext()
 	attempts := 0

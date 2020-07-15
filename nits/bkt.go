@@ -67,6 +67,10 @@ func (s *studentState) registerAnswer(q Question, correct bool) {
 		questionShortName: q.getShortName(),
 		question:          q,
 		correct:           correct})
+	s.burn(q)
+}
+
+func (s *studentState) burn(q Question) {
 	s.burnt[q] = nil
 }
 
@@ -252,6 +256,11 @@ func (s *studentState) selectQuestion() Question {
 	possibles := make([]Question, 0)
 	for _, q := range s.content.Questions {
 		if _, ok := s.burnt[q]; ok {
+			continue
+		}
+		concepts := q.getTrainingConcepts()
+		if len(concepts) == 0 {
+			possibles = append(possibles, q)
 			continue
 		}
 		for _, c := range q.getTrainingConcepts() {

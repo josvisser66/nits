@@ -22,4 +22,22 @@ func (c *Case) check() {
 }
 
 func (c *Case) ask(ui *userInterface, state *studentState) {
+	displayQuestion := func([]string) bool {
+		ui.println("this is case %s", c.ShortName)
+		return false
+	}
+
+	displayQuestion(nil)
+	ui.pushPrompt("Your answer? ")
+	pushCommandContext(state, ui, c, displayQuestion)
+	defer ui.popPrompt()
+	defer ui.popCommandContext()
+
+	for {
+		_, ret := ui.getInput()
+		if ret {
+			return
+		}
+	}
 }
+

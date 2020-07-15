@@ -87,6 +87,19 @@ func debug(ui *userInterface, state *studentState) {
 				},
 			},
 			{
+				Aliases: []string{"casedot"},
+				Help:    "Generates dot file for a case.",
+				Executor: func(words []string) bool {
+					fname, err := makeCaseDot(state, words)
+					if err != nil {
+						ui.println("error: %s", err)
+					} else {
+						ui.println("now run: dot -Tpdf %s >/tmp/aap.pdf", fname)
+					}
+					return false
+				},
+			},
+			{
 				Aliases: []string{"trace"},
 				Help:    "Switching detail tracing on or off",
 				Executor: func(words []string) bool {
