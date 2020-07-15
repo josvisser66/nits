@@ -3,73 +3,14 @@ package nits
 // --------------------------------------------------------------------
 type Person struct {
 	Name string
-	Injuries []*Injury
-	Duties []*Duty
-	Acts []*Act
-}
-
-type Victim interface {
-	GetPerson() *Person
-	GetInjuries() []*Injury
-}
-
-func (p *Person) GetInjuries() []*Injury {
-	return p.Injuries
-}
-
-type Actor interface {
-	GetPerson() *Person
-	GetActs() []*Act
-}
-
-func (p *Person) GetActs() []*Act {
-	return p.Acts
-}
-
-func (p *Person) GetPerson() *Person {
-	return p
 }
 
 // --------------------------------------------------------------------
-type Act interface {
-	GetActors() []*Actor
-	GetConsequences() []*Event
-}
-
-type ActiveAct struct {
+type BrokenLegalRequirement struct {
 	Description string
-	Actors []*Actor
+	Persons []*Person
 	Consequences []*Event
-}
-
-func (a *ActiveAct) GetCauseDescription() string {
-	return a.Description
-}
-
-func (a *ActiveAct) GetConsequences() []*Event {
-	return a.Consequences
-}
-
-func (a *ActiveAct) GetActors() []*Actor {
-	return a.Actors
-}
-
-type NonAct struct {
-	Description string
-	Actors []*Actor
-	Consequences []*Event
-}
-
-func (n *NonAct) GetCauseDescription() string {
-	return n.Description
-}
-
-func (n *NonAct) GetConsequences() []*Event {
-	return n.Consequences
-}
-
-func (n *NonAct) GetActors() []*Actor {
-	return n.Actors
+	Explanation *Explanation
 }
 
 // --------------------------------------------------------------------
@@ -79,6 +20,8 @@ type Duty interface {
 
 type ActiveDuty struct {
 	Description string
+	OwedFrom []*Person
+	OwedTo[] *Person
 }
 
 func (a *ActiveDuty) GetDutyDescription() string {
@@ -94,9 +37,19 @@ func (n *NonDuty) GetDutyDescription() string {
 }
 
 // --------------------------------------------------------------------
+type IrrelevantCause struct {
+	Description string
+	Explanation *Explanation
+}
+
+// --------------------------------------------------------------------
 type Event struct {
 	Description string
 	Consequences []*Event
+	Duty Duty
+	NegPerSe BrokenLegalRequirement
+	IrrelevantCause *IrrelevantCause
+	InjuriesOrDamages []InjuryOrDamage
 }
 
 func (e *Event) GetCauseDescription() string {
@@ -109,48 +62,44 @@ type Cause interface {
 }
 
 // --------------------------------------------------------------------
-type Injury interface {
-	GetInjuryDescription() string
-	GetDirectCauses() []*Cause
+type InjuryOrDamage interface {
+	GetDescription() string
+	GetPersons() []*Person
 }
 
 type BodilyInjury struct {
 	Description string
-	Causes []*Cause
+	Persons []*Person
 }
 
-func (b *BodilyInjury) GetInjuryDescription() string {
+func (b *BodilyInjury) GetDescription() string {
 	return b.Description
 }
 
-func (b *BodilyInjury) GetDirectCauses() []*Cause {
-	return b.Causes
+func (b *BodilyInjury) GetPersons() []*Person {
+	return b.Persons
 }
 
 type EmotionalHarm struct {
 	Description string
-	Causes []*Cause
+	Persons []*Person
 }
 
 func (e *EmotionalHarm) GetInjuryDescription() string {
 	return e.Description
 }
 
-func (e *EmotionalHarm) GetDirectCauses() []*Cause {
-	return e.Causes
-}
-
 type PropertyDamage struct {
 	Description string
-	Causes []*Cause
+	Persons []*Person
 }
 
-func (p *PropertyDamage) GetInjuryDescription() string {
+func (p *PropertyDamage) GetDescription() string {
 	return p.Description
 }
 
-func (p *PropertyDamage) GetDirectCauses() []*Cause {
-	return p.Causes
+func (p *PropertyDamage) GetPersons() []*Person {
+	return p.Persons
 }
 
 // --------------------------------------------------------------------
