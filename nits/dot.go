@@ -7,6 +7,12 @@ import (
 	"os"
 )
 
+const (
+	shapePerson = "septagon"
+	shapeEvent  = "ellipse"
+	shapeDuty   = "pentagon"
+)
+
 func makeDot(state *studentState, withSkills bool) (string, error) {
 	f, err := ioutil.TempFile("", "nits*.dot")
 	if err != nil {
@@ -43,39 +49,6 @@ func makeDot(state *studentState, withSkills bool) (string, error) {
 }
 
 // --------------------------------------------------------------------
-type caseDotState struct {
-	events map[*Event]interface{}
-}
-
-func (s *caseDotState) dotEvent(f *os.File, e *Event) error {
-	if _, ok := s.events[e]; !ok {
-		_, err := f.WriteString(fmt.Sprintf("event_%p [label=\"%s\"];\n", e, e.Description))
-		if err != nil {
-			return err
-		}
-		s.events[e] = nil
-		s.dotEvents(f, e.Consequences)
-
-		for _, e2 := range e.Consequences {
-			_, err := f.WriteString(fmt.Sprintf("  event_%p -> event_%p;\n", e, e2))
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-func (s *caseDotState) dotEvents(f *os.File, events []*Event) error {
-	for _, e := range events {
-		if err := s.dotEvent(f, e); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func makeCaseDot(state *studentState, words []string) (string, error) {
 	if len(words) < 2 {
 		return "", errors.New("please provide the short name of a case as an argument")
@@ -88,6 +61,7 @@ func makeCaseDot(state *studentState, words []string) (string, error) {
 	if !ok {
 		return "", errors.New("that question is not a case")
 	}
+	pp := preprocess(c)
 	f, err := ioutil.TempFile("", "nits*.dot")
 	if err != nil {
 		return "", err
@@ -99,10 +73,65 @@ func makeCaseDot(state *studentState, words []string) (string, error) {
 		return f.Name(), err
 	}
 
-	s := &caseDotState{map[*Event]interface{}{}}
-	s.dotEvents(f, c.RootEvents)
+	if err := dotPersons(f, pp.persons); err != nil {
+		return "", err
+	}
+
+	if err := dotDuties(f, pp.duties); err != nil {
+		return "", err
+	}
+
+	if err := dotEvents(f, pp.events); err != nil {
+		return "", err
+	}
 
 	_, err = f.WriteString("}\n")
 
 	return f.Name(), err
+}
+
+func dotDuties(f *os.File, duties map[*Duty]interface{}) error {
+	for duty := range duties {
+		if _, err := f.WriteString(fmt.Sprintf("  duty_%p [shape=%s,label=\"%s\"];\n", duty, shapeDuty, duty.Description)); err != nil {
+			return err
+		}
+		for _, person := range duty.OwedFrom {
+			if _, err := f.WriteString(fmt.Sprintf("  person_%p -> duty_%p;\n", person, duty)); err != nil {
+				return nil
+			}
+		}
+		for _, person := range duty.OwedTo {
+			if _, err := f.WriteString(fmt.Sprintf("  duty_%p -> person_%p;\n", duty, person)); err != nil {
+				return nil
+			}
+		}
+	}
+	return nil
+}
+
+func dotPersons(f *os.File, persons map[*Person]interface{}) error {
+	for person := range persons {
+		if _, err := f.WriteString(fmt.Sprintf("  person_%p [shape=%s,label=\"%s\"];\n", person, shapePerson, person.Name)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func dotEvents(f *os.File, events map[*Event]interface{}) error {
+	for event := range events {
+		if _, err := f.WriteString(fmt.Sprintf("  event_%p [shape=%s,label=\"%s\"];\n", event, shapeEvent, event.Description)); err != nil {
+			return err
+		}
+	}
+
+	for event := range events {
+		for _, consequence := range event.Consequences {
+			if _, err := f.WriteString(fmt.Sprintf("  event_%p -> event_%p;\n", event, consequence)); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

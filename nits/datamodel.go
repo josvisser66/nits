@@ -11,43 +11,30 @@ type BrokenLegalRequirement struct {
 	Persons []*Person
 	Consequences []*Event
 	Explanation *Explanation
+	event *Event
 }
 
 // --------------------------------------------------------------------
-type Duty interface {
-	GetDutyDescription() string
-}
-
-type ActiveDuty struct {
+type Duty struct {
 	Description string
 	OwedFrom []*Person
 	OwedTo[] *Person
-}
-
-func (a *ActiveDuty) GetDutyDescription() string {
-	return a.Description
-}
-
-type NonDuty struct {
-	Description string
-}
-
-func (n *NonDuty) GetDutyDescription() string {
-	return n.Description
+	event *Event
 }
 
 // --------------------------------------------------------------------
 type IrrelevantCause struct {
 	Description string
 	Explanation *Explanation
+	event *Event
 }
 
 // --------------------------------------------------------------------
 type Event struct {
 	Description string
 	Consequences []*Event
-	Duty Duty
-	NegPerSe BrokenLegalRequirement
+	Duty *Duty
+	NegPerSe *BrokenLegalRequirement
 	IrrelevantCause *IrrelevantCause
 	InjuriesOrDamages []InjuryOrDamage
 }

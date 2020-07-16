@@ -9,12 +9,12 @@ func case1() Question {
 	bruce := &Person{Name: "Bruce"}
 	rooke := &Person{Name: "Rooke"}
 
-	doAGoodOilChange := &ActiveDuty{
+	doAGoodOilChange := &Duty{
 		Description: "Perform a good quality oil change",
 		OwedFrom:    []*Person{demi},
 		OwedTo:      []*Person{ashton},
 	}
-	giveGoodAdvice := &ActiveDuty{
+	giveGoodAdvice := &Duty{
 		Description: "Give good advice",
 		OwedFrom:    []*Person{demi},
 		OwedTo:      []*Person{ashton},
@@ -33,7 +33,7 @@ func case1() Question {
 		InjuriesOrDamages: []InjuryOrDamage{rookesInjury},
 	}
 
-	rookeShouldHaveWornASeatbelt := BrokenLegalRequirement{
+	rookeShouldHaveWornASeatbelt := &BrokenLegalRequirement{
 		Description:  "Brooke did not wear a seatbelt",
 		Persons:      []*Person{rooke},
 		Consequences: []*Event{rookeGetsThrownFromTheCar},
@@ -59,7 +59,7 @@ func case1() Question {
 		},
 	}
 
-	bruceHadDrankTooMuch := BrokenLegalRequirement{
+	bruceHadDrankTooMuch := &BrokenLegalRequirement{
 		Description:  "Bruce had drank too much and had blood alcohol levels over the legal limit",
 		Persons:      []*Person{bruce},
 		Consequences: []*Event{brucesCarPlowsIntoAshtonsCar},

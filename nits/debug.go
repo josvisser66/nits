@@ -1,5 +1,10 @@
 package nits
 
+import (
+	"fmt"
+	"os/exec"
+)
+
 var (
 	trace *tracer
 )
@@ -23,6 +28,20 @@ func displayAnswers(ui *userInterface, state *studentState) {
 	for _, answer := range state.answers {
 		ui.println("%5t: %s", answer.correct, answer.questionShortName)
 	}
+}
+
+func runShell(shellCommand string) error {
+	cmd := exec.Command("/bin/bash", "-c", shellCommand)
+	_, err := cmd.Output()
+	return err
+}
+
+func showDot(ui *userInterface, fname string) error {
+	ui.println("Dot file: %s", fname)
+	if err := runShell(fmt.Sprintf("dot -Tpdf %s >/tmp/aap.pdf && open /tmp/aap.pdf", fname)); err != nil {
+		return err
+	}
+	return nil
 }
 
 func debug(ui *userInterface, state *studentState) {
@@ -80,8 +99,10 @@ func debug(ui *userInterface, state *studentState) {
 					fname, err := makeDot(state, ui.yesNo("Augment concepts with skill level ratios"))
 					if err != nil {
 						ui.println("error: %s", err)
-					} else {
-						ui.println("now run: dot -Tpdf %s >/tmp/aap.pdf", fname)
+						return false
+					}
+					if err := showDot(ui, fname); err != nil {
+						ui.println("error: %s", err)
 					}
 					return false
 				},
@@ -93,8 +114,10 @@ func debug(ui *userInterface, state *studentState) {
 					fname, err := makeCaseDot(state, words)
 					if err != nil {
 						ui.println("error: %s", err)
-					} else {
-						ui.println("now run: dot -Tpdf %s >/tmp/aap.pdf", fname)
+						return false
+					}
+					if err := showDot(ui, fname); err != nil {
+						ui.println("error: %s", err)
 					}
 					return false
 				},
@@ -122,10 +145,10 @@ func debug(ui *userInterface, state *studentState) {
 				},
 			},
 			{
-				Aliases:  []string{"select"},
-				Help:     "Run the question selection algorithm",
+				Aliases: []string{"select"},
+				Help:    "Run the question selection algorithm",
 				Executor: func([]string) bool {
-					q :=state.selectQuestion()
+					q := state.selectQuestion()
 					if q == nil {
 						ui.println("No question selected!")
 					}

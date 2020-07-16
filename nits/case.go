@@ -4,7 +4,9 @@ package nits
 type Case struct {
 	ShortName  string
 	RootEvents []*Event
+	preproc preprocessedCase
 }
+
 
 func (c *Case) getShortName() string {
 	return c.ShortName
