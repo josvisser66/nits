@@ -25,7 +25,7 @@ func (p *preprocessedCase) ppInjuriesOrDamages(event *Event, injuriesOrDamages [
 		if _, ok := p.injuriesOrDamages[id]; ok {
 			continue
 		}
-
+		p.injuriesOrDamages[id]=nil
 		p.ppPersons(id.GetPersons())
 	}
 }

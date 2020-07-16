@@ -8,9 +8,10 @@ import (
 )
 
 const (
-	shapePerson = "septagon"
-	shapeEvent  = "ellipse"
-	shapeDuty   = "pentagon"
+	shapePerson         = "septagon"
+	shapeEvent          = "ellipse"
+	shapeDuty           = "hexagon"
+	shapeInjuryOrDamage = "egg"
 )
 
 func makeDot(state *studentState, withSkills bool) (string, error) {
@@ -81,6 +82,10 @@ func makeCaseDot(state *studentState, words []string) (string, error) {
 		return "", err
 	}
 
+	if err := dotInjuryOrDamages(f, pp.injuriesOrDamages); err != nil {
+		return "", err
+	}
+
 	if err := dotEvents(f, pp.events); err != nil {
 		return "", err
 	}
@@ -90,9 +95,32 @@ func makeCaseDot(state *studentState, words []string) (string, error) {
 	return f.Name(), err
 }
 
+type hasLabel interface {
+	getLabel() string
+}
+
+func draw(f *os.File, t string, shape string, obj hasLabel) error {
+	_, err := f.WriteString(fmt.Sprintf("  %s_%p [shape=%s,label=\"%s\"];\n", t, obj, shape, obj.getLabel()))
+	return err
+}
+
+func dotInjuryOrDamages(f *os.File, id map[InjuryOrDamage]interface{}) error {
+	for dam := range id {
+		if err := draw(f, "dam", shapeInjuryOrDamage, dam); err != nil {
+			return err
+		}
+		for _, person := range dam.GetPersons() {
+			if _, err := f.WriteString(fmt.Sprintf("  person_%p -> dam_%p [style=dotted];\n", person, dam)); err != nil {
+				return nil
+			}
+		}
+	}
+	return nil
+}
+
 func dotDuties(f *os.File, duties map[*Duty]interface{}) error {
 	for duty := range duties {
-		if _, err := f.WriteString(fmt.Sprintf("  duty_%p [shape=%s,label=\"%s\"];\n", duty, shapeDuty, duty.Description)); err != nil {
+		if err := draw(f, "duty", shapeDuty, duty); err != nil {
 			return err
 		}
 		for _, person := range duty.OwedFrom {
@@ -111,7 +139,7 @@ func dotDuties(f *os.File, duties map[*Duty]interface{}) error {
 
 func dotPersons(f *os.File, persons map[*Person]interface{}) error {
 	for person := range persons {
-		if _, err := f.WriteString(fmt.Sprintf("  person_%p [shape=%s,label=\"%s\"];\n", person, shapePerson, person.Name)); err != nil {
+		if err := draw(f, "person", shapePerson, person); err != nil {
 			return err
 		}
 	}
@@ -120,7 +148,7 @@ func dotPersons(f *os.File, persons map[*Person]interface{}) error {
 
 func dotEvents(f *os.File, events map[*Event]interface{}) error {
 	for event := range events {
-		if _, err := f.WriteString(fmt.Sprintf("  event_%p [shape=%s,label=\"%s\"];\n", event, shapeEvent, event.Description)); err != nil {
+		if err := draw(f, "event", shapeEvent, event); err != nil {
 			return err
 		}
 	}
@@ -128,6 +156,37 @@ func dotEvents(f *os.File, events map[*Event]interface{}) error {
 	for event := range events {
 		for _, consequence := range event.Consequences {
 			if _, err := f.WriteString(fmt.Sprintf("  event_%p -> event_%p;\n", event, consequence)); err != nil {
+				return err
+			}
+		}
+		if event.Duty != nil {
+			if _, err := f.WriteString(fmt.Sprintf("  duty_%p -> event_%p [style=dotted];\n", event.Duty, event)); err != nil {
+				return err
+			}
+		}
+		if event.IrrelevantCause != nil {
+			if err := draw(f, "irrcause", shapeEvent, event.IrrelevantCause); err != nil {
+				return err
+			}
+			if _, err := f.WriteString(fmt.Sprintf("  irrcause_%p -> event_%p [style=dotted];\n", event.IrrelevantCause, event)); err != nil {
+				return err
+			}
+		}
+		if event.NegPerSe != nil {
+			if err := draw(f, "negperse", shapeEvent, event.NegPerSe); err != nil {
+				return err
+			}
+			if _, err := f.WriteString(fmt.Sprintf("  negperse_%p -> event_%p [style=dotted];\n", event.NegPerSe, event)); err != nil {
+				return err
+			}
+			for _, person := range event.NegPerSe.Persons {
+				if _, err := f.WriteString(fmt.Sprintf("  person_%p -> negperse_%p [style=dotted];\n", person, event.NegPerSe)); err != nil {
+					return err
+				}
+			}
+		}
+		for _, dam := range event.InjuriesOrDamages {
+			if _, err := f.WriteString(fmt.Sprintf("  event_%p -> dam_%p;\n", event, dam)); err != nil {
 				return err
 			}
 		}

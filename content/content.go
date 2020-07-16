@@ -26,6 +26,7 @@ func case1() Question {
 	}
 	brucesDamage := &PropertyDamage{
 		Description: "Bruce's car is seriously damaged because of the accident",
+		Persons:     []*Person{bruce},
 	}
 
 	rookeGetsThrownFromTheCar := &Event{
@@ -34,7 +35,7 @@ func case1() Question {
 	}
 
 	rookeShouldHaveWornASeatbelt := &BrokenLegalRequirement{
-		Description:  "Brooke did not wear a seatbelt",
+		Description:  "Rooke did not wear a seatbelt",
 		Persons:      []*Person{rooke},
 		Consequences: []*Event{rookeGetsThrownFromTheCar},
 		Explanation: &Explanation{
@@ -48,6 +49,7 @@ func case1() Question {
 
 	brucesCarPlowsIntoAshtonsCar := &Event{
 		Description:       "Bruce's car plows into Ashton's car",
+		Consequences: []*Event{rookeGetsThrownFromTheCar},
 		InjuriesOrDamages: []InjuryOrDamage{brucesDamage},
 		IrrelevantCause: &IrrelevantCause{
 			Description: "Bruce claims that he did not see Ashton's car because of the truck in front of him",
