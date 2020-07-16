@@ -26,7 +26,7 @@ func displayAnswers(ui *userInterface, state *studentState) {
 	ui.newline()
 
 	for _, answer := range state.answers {
-		ui.println("%5t: %s", answer.correct, answer.questionShortName)
+		ui.println("%5t: %s#%s", answer.correct, answer.questionShortName, answer.subQuestion)
 	}
 }
 

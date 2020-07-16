@@ -43,6 +43,7 @@ func initBKT() {
 type answer struct {
 	questionShortName string // Here because of JSON unmarshaling.
 	question          Question
+	subQuestion			string
 	correct           bool
 }
 
@@ -62,10 +63,11 @@ func newStudentState(content *Content) *studentState {
 	}
 }
 
-func (s *studentState) registerAnswer(q Question, correct bool) {
+func (s *studentState) registerAnswer(q Question, subQuestion string, correct bool) {
 	s.answers = append(s.answers, &answer{
 		questionShortName: q.getShortName(),
 		question:          q,
+		subQuestion: subQuestion,
 		correct:           correct})
 	s.burn(q)
 }
@@ -78,6 +80,7 @@ func (a *answer) MarshalJSON() ([]byte, error) {
 	m := make(map[string]interface{})
 	m["shortName"] = a.questionShortName
 	m["correct"] = a.correct
+	m["subQuestion"] = a.subQuestion
 
 	return json.Marshal(m)
 }
@@ -96,6 +99,11 @@ func (a *answer) UnmarshalJSON(b []byte) error {
 		a.questionShortName = v
 	} else {
 		return errors.New("data format error (shortName)")
+	}
+	if v, ok := m["subQuestion"].(string); ok {
+		a.subQuestion = v
+	} else {
+		return errors.New("data format error (subQuestion)")
 	}
 
 	return nil
@@ -121,6 +129,12 @@ func (s *studentState) loadUserData() error {
 	}
 
 	for _, a := range s.answers {
+		// There is a chance that we are not finding the question if either
+		// the student data has been manipulated (manual testing) or if the
+		// question database has changed and a question has been removed.
+		// Since we have already loaded the record we are going to keep it,
+		// but when saving the student state we might drop it since there
+		// is nothing we can do with it (the concepts have been lost).
 		a.question = s.content.findQuestion(a.questionShortName)
 		if a.question != nil {
 			s.burnt[a.question] = nil
@@ -140,10 +154,8 @@ func (s *studentState) writeTrainhmmInput() (string, error) {
 
 	for _, a := range s.answers {
 		columns := make([]string, 0)
-		q := s.content.findQuestion(a.questionShortName)
-		if q == nil {
-			// There is a question in the answer list that is not in the
-			// content.
+		if a.question == nil {
+			// Question was removed from the question database.
 			continue
 		}
 		if a.correct {
@@ -151,9 +163,9 @@ func (s *studentState) writeTrainhmmInput() (string, error) {
 		} else {
 			columns = append(columns, incorrect)
 		}
-		columns = append(columns, "student", a.questionShortName)
+		columns = append(columns, "student", fmt.Sprintf("%s#%s", a.questionShortName, a.subQuestion))
 		names := make([]string, 0)
-		for _, c := range q.getTrainingConcepts() {
+		for _, c := range a.question.getTrainingConcepts(a.subQuestion) {
 			names = append(names, c.shortName)
 		}
 		columns = append(columns, strings.Join(names, separator))
@@ -208,7 +220,7 @@ func (s *studentState) readPrediction(td string) error {
 		if d == 1.0 {
 			i = 1
 		}
-		for _, c := range a.question.getTrainingConcepts() {
+		for _, c := range a.question.getTrainingConcepts(a.subQuestion) {
 			d, err := strconv.ParseFloat(words[i], 64)
 			if err != nil {
 				return err
@@ -242,7 +254,7 @@ func (s *studentState) train() error {
 // --------------------------------------------------------------------
 func (s *studentState) avg(q Question) float64 {
 	total := 0.0
-	concepts := q.getTrainingConcepts()
+	concepts := q.getTrainingConcepts("")
 	for _, c := range concepts {
 		total += s.scores[c]
 	}
@@ -258,12 +270,12 @@ func (s *studentState) selectQuestion() Question {
 		if _, ok := s.burnt[q]; ok {
 			continue
 		}
-		concepts := q.getTrainingConcepts()
+		concepts := q.getTrainingConcepts("")
 		if len(concepts) == 0 {
 			possibles = append(possibles, q)
 			continue
 		}
-		for _, c := range q.getTrainingConcepts() {
+		for _, c := range concepts {
 			if s.scores[c] < threshold {
 				possibles = append(possibles, q)
 				break
@@ -282,7 +294,7 @@ func (s *studentState) selectQuestion() Question {
 	if trace != nil {
 		for _, q := range possibles {
 			trace.print("%32s", q.getShortName())
-			for _, c := range q.getTrainingConcepts() {
+			for _, c := range q.getTrainingConcepts("") {
 				trace.print("%20s(%f)", c.shortName, s.scores[c])
 			}
 			trace.println("  avg=%f", s.avg(q))

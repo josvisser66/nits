@@ -8,7 +8,7 @@ import (
 type Question interface {
 	getShortName() string
 	getConcepts() []*Concept
-	getTrainingConcepts() []*Concept
+	getTrainingConcepts(subQuestion string) []*Concept
 	check()
 	ask(ui *userInterface, state *studentState)
 }
@@ -64,7 +64,8 @@ func (q *MultipleChoiceQuestion) getConcepts() []*Concept {
 	return conceptMapToSlice(m)
 }
 
-func (q *MultipleChoiceQuestion) getTrainingConcepts() []*Concept {
+func (q *MultipleChoiceQuestion) getTrainingConcepts(subQuestion string) []*Concept {
+	CHECK(subQuestion == "", "unexpected subQuestion for MultipleChoiceQuestion")
 	m := make(map[*Concept]interface{})
 
 	for _, c := range q.Concepts {
@@ -161,7 +162,7 @@ func (q *MultipleChoiceQuestion) ask(ui *userInterface, state *studentState) {
 		}
 		if answers[answer].Correct {
 			ui.println("Correct :-)")
-			state.registerAnswer(q, attempts == 0)
+			state.registerAnswer(q, "", attempts == 0)
 			return
 		}
 		ui.println("Incorrect :-(")
@@ -203,7 +204,8 @@ func (q *PropsQuestion) getConcepts() []*Concept {
 	return conceptMapToSlice(m)
 }
 
-func (q *PropsQuestion) getTrainingConcepts() []*Concept {
+func (q *PropsQuestion) getTrainingConcepts(subQuestion string) []*Concept {
+	CHECK(subQuestion == "", "unexpected subQuestion for PropsQuestion")
 	return q.getConcepts()
 }
 
@@ -308,7 +310,7 @@ outer:
 			answer >>= 1
 		}
 		ui.println("Correct :-)")
-		state.registerAnswer(q, attempts == 0)
+		state.registerAnswer(q, "", attempts == 0)
 		return
 	}
 }

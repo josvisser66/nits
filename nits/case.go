@@ -16,7 +16,7 @@ func (c *Case) getConcepts() []*Concept {
 	return nil
 }
 
-func (c *Case) getTrainingConcepts() []*Concept {
+func (c *Case) getTrainingConcepts(subQuestion string) []*Concept {
 	return nil
 }
 
