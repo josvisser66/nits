@@ -37,6 +37,19 @@ var (
 		shortName: "foreseeability",
 		level:     1,
 	}).add()
+	CauseInFact = (&Concept{
+		name: "cause in fact",
+		shortName: "causeinfact",
+		level: 1,
+		explanation: &Explanation{
+			Text:       []string{
+				"Cause-in-fact causation requires a plaintiff to show that he or she would not have been " +
+					"injured but for the defendant's actions. The essential question in determining the " +
+					"cause-in-fact is whether the plaintiff's injuries would have resulted regardless of "+
+					"the defendant's negligence.",
+			},
+		},
+	}).add()
 	ComparativeNegligence = (&Concept{
 		name:      "comparative negligence",
 		shortName: "compneg",

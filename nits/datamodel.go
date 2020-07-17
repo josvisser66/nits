@@ -47,16 +47,32 @@ func (i *IrrelevantCause) getLabel() string {
 
 // --------------------------------------------------------------------
 type Event struct {
+	shortName		  string
 	Description       string
 	Consequences      []*Event
 	Duty              *Duty
 	NegPerSe          *BrokenLegalRequirement
 	IrrelevantCause   *IrrelevantCause
 	InjuriesOrDamages []InjuryOrDamage
+	causes            []*Event
 }
 
 func (e *Event) getLabel() string {
 	return e.Description
+}
+
+func (e *Event) addCause(event *Event) {
+	if event == nil {
+		return
+	}
+	if e.causes == nil {
+		e.causes = make([]*Event,0,1)
+	}
+	e.causes = append(e.causes, event)
+}
+
+func (e *Event) getCauses() []*Event {
+	return e.causes
 }
 
 // --------------------------------------------------------------------
@@ -69,11 +85,14 @@ type InjuryOrDamage interface {
 	GetDescription() string
 	GetPersons() []*Person
 	getLabel() string
+	getCauses() []*Event
+	addCause(event *Event)
 }
 
 type BodilyInjury struct {
 	Description string
 	Persons     []*Person
+	causes      []*Event
 }
 
 func (b *BodilyInjury) GetDescription() string {
@@ -88,6 +107,17 @@ func (b *BodilyInjury) GetPersons() []*Person {
 	return b.Persons
 }
 
+func (b *BodilyInjury) addCause(event *Event) {
+	if b.causes == nil {
+		b.causes = make([]*Event, 0, 1)
+	}
+	b.causes = append(b.causes, event)
+}
+
+func (b *BodilyInjury) getCauses() []*Event {
+	return b.causes
+}
+
 type EmotionalHarm struct {
 	Description string
 	Persons     []*Person
@@ -100,6 +130,7 @@ func (e *EmotionalHarm) GetInjuryDescription() string {
 type PropertyDamage struct {
 	Description string
 	Persons     []*Person
+	causes      []*Event
 }
 
 func (p *PropertyDamage) GetDescription() string {
@@ -112,6 +143,17 @@ func (p *PropertyDamage) getLabel() string {
 
 func (p *PropertyDamage) GetPersons() []*Person {
 	return p.Persons
+}
+
+func (p *PropertyDamage) addCause(event *Event) {
+	if p.causes == nil {
+		p.causes = make([]*Event, 0, 1)
+	}
+	p.causes = append(p.causes, event)
+}
+
+func (p *PropertyDamage) getCauses() []*Event {
+	return p.causes
 }
 
 // --------------------------------------------------------------------

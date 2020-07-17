@@ -45,8 +45,8 @@ func Run(content *Content) {
 				Aliases: []string{"debug"},
 				Global:  true,
 				Help:    "NITS debugging (internal)",
-				Executor: func([]string) bool {
-					debug(ui, state)
+				Executor: func(words []string) bool {
+					debug(ui, state, words)
 					return false
 				},
 			},

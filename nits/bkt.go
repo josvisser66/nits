@@ -52,6 +52,7 @@ type studentState struct {
 	burnt   map[Question]interface{} // A set, basically.
 	scores  map[*Concept]float64
 	content *Content
+	nextQuestion Question // for debugger, not used otherwise.
 }
 
 func newStudentState(content *Content) *studentState {
@@ -261,7 +262,22 @@ func (s *studentState) avg(q Question) float64 {
 	return total / float64(len(concepts))
 }
 
+func (s *studentState) conceptsNotMastered(cas *Case) []*Concept {
+	result := make([]*Concept, 0)
+	for _, c := range cas.getTrainingConcepts("") {
+		if s.scores[c] < threshold {
+			result = append(result, c)
+		}
+	}
+	return result
+}
+
 func (s *studentState) selectQuestion() Question {
+	if s.nextQuestion != nil {
+		q := s.nextQuestion
+		s.nextQuestion = nil
+		return q
+	}
 	if err := s.train(); err != nil {
 		panic(fmt.Sprintf("training error: %v", err))
 	}

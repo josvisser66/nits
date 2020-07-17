@@ -84,15 +84,23 @@ func (q *MultipleChoiceQuestion) getTrainingConcepts(subQuestion string) []*Conc
 	return conceptMapToSlice(m)
 }
 
-func pushCommandContext(state *studentState, ui *userInterface, q Question, displayQuestion func([]string) bool) {
+func pushCommandContext(name string, state *studentState, ui *userInterface, q Question, displayQuestion func([]string) bool) {
 	ui.pushCommandContext(&CommandContext{
-		Description: "Answering a multiple choice question",
+		Description: name,
 		Commands: []*Command{
 			{
 				Aliases:  []string{"again"},
 				Global:   true,
 				Help:     "Displays the question again.",
 				Executor: displayQuestion,
+			},
+			{
+				Aliases:  []string{"abandon"},
+				Global:   true,
+				Help:     "Abandons this question.",
+				Executor: func([]string) bool {
+					return true
+				},
 			},
 			{
 				Aliases: []string{"explore"},
@@ -140,7 +148,7 @@ func (q *MultipleChoiceQuestion) ask(ui *userInterface, state *studentState) {
 
 	displayQuestion(nil)
 	ui.pushPrompt("Your answer? ")
-	pushCommandContext(state, ui, q, displayQuestion)
+	pushCommandContext("Answering a MC question", state, ui, q, displayQuestion)
 	defer ui.popPrompt()
 	defer ui.popCommandContext()
 
@@ -281,7 +289,7 @@ func (q *PropsQuestion) ask(ui *userInterface, state *studentState) {
 
 	displayQuestion(nil)
 	ui.pushPrompt("Your answer? ")
-	pushCommandContext(state, ui, q, displayQuestion)
+	pushCommandContext("Answering a proposition question", state, ui, q, displayQuestion)
 	defer ui.popPrompt()
 	defer ui.popCommandContext()
 	attempts := 0

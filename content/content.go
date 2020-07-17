@@ -49,7 +49,7 @@ func case1() Question {
 
 	brucesCarPlowsIntoAshtonsCar := &Event{
 		Description:       "Bruce's car plows into Ashton's car",
-		Consequences: []*Event{rookeGetsThrownFromTheCar},
+		Consequences:      []*Event{rookeGetsThrownFromTheCar},
 		InjuriesOrDamages: []InjuryOrDamage{brucesDamage},
 		IrrelevantCause: &IrrelevantCause{
 			Description: "Bruce claims that he did not see Ashton's car because of the truck in front of him",
@@ -93,7 +93,7 @@ func case1() Question {
 		Consequences: []*Event{smokeUnderHood, carDies},
 	}
 	demiGivesBadAdvice := &Event{
-		Description:  "Demi advices Ashton to continue driving and to bring the car in at his convenience",
+		Description:  "Demi advises Ashton to continue driving and to bring the car in at his convenience",
 		Consequences: []*Event{continuesDriving},
 		Duty:         giveGoodAdvice,
 	}
@@ -106,7 +106,7 @@ func case1() Question {
 		Consequences: []*Event{askingAdvice},
 	}
 	lowOilPressure := &Event{
-		Description:  "Ashton's low on on oil",
+		Description:  "Ashton's car is low on on oil",
 		Consequences: []*Event{oilLightGoesOn},
 	}
 	badOilChange := &Event{
@@ -116,6 +116,39 @@ func case1() Question {
 	}
 
 	return &Case{
+		Text: []string{
+			"Ashton left his home at 5:00 p.m. on Thursday, November 12, 2010, for a doctor's " +
+				"appointment. His appointment was at 5:30 p.m. and it would take him at least 25 minutes to " +
+				"reach his doctor's office. As Ashton pulled into traffic, he noted that the yellow low oil " +
+				"pressure light on his dashboard was on. He was concerned, because he had just taken the car " +
+				"in for a routine service and oil change at Mayko the day before. He pulled over to the side of " +
+				"the road, pulled his receipt from the dashboard, and used his cell phone to call Demi, the " +
+				"owner of Mayko. Demi assured Ashton that the light did not really mean that the oil pressure " +
+				"was low because they had just changed it the day before. Instead, Demi said, the light was " +
+				"probably just the result of a failure to reset a switch when they changed the oil or some sort of " +
+				"short in the wiring. Demi advised Ashton to bring the car by at his convenience, and that she " +
+				"would reset or repair the light.",
+
+			"Relieved, Ashton continued down the highway toward his doctor's office. A few minutes " +
+				"later, when Ashton was less than a mile from his doctor's office, he saw smoke coming from " +
+				"the hood of the car. He tried to pull over to the side of the road, but before he could make it, " +
+				"his engine died completely and the volume of smoke became even greater. Ashton dashed " +
+				"from the car, leaving it in the right hand lane of traffic. A small fire erupted from the sides of " +
+				"the hood. Again using his cell phone, Ashton dialed 911 and requested fire department and " +
+				"police assistance. ",
+
+			"But before fire or police units arrived, a car driven by Bruce plowed into the back of Ashton's " +
+				"car. Bruce was not injured, but his passenger, Rooke, was thrown from the car and suffered " +
+				"serious injuries. The police determined that although Bruce had been wearing a seatbelt at the " +
+				"time of the collision, Rooke was not wearing a seatbelt. The police also determined that both " +
+				"Bruce and Rooke, who had been drinking together all afternoon, had blood alcohol levels over " +
+				"the legal limit. Bruce claimed that he did not see Ashton's car in time to stop because the 18- " +
+				"wheeler in front of him had obscured his view of what was in the lane ahead. When the truck " +
+				"changed lanes just before reaching Ashton's disabled car, Bruce was suddenly able to see " +
+				"Ashton's car, but not in time to stop. An investigation reveals that Ashton's car stalled " +
+				"because it ran out of oil. Demi had failed to replace the oil pan properly and all the oil in the " +
+				"car had drained out.",
+		},
 		ShortName:  "case_ashton_car_crash",
 		RootEvents: []*Event{badOilChange},
 	}

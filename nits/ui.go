@@ -1,6 +1,7 @@
 package nits
 
 import (
+	"errors"
 	"fmt"
 	"github.com/chzyer/readline"
 	"io"
@@ -186,6 +187,20 @@ func filterInput(r rune) (rune, bool) {
 	return r, true
 }
 
+func isYesNo(line string) (bool, error) {
+	switch strings.TrimSpace(strings.ToLower(line)) {
+	case "y":
+		fallthrough
+	case "yes":
+		return true, nil
+	case "n":
+		fallthrough
+	case "no":
+		return false, nil
+	}
+	return false, errors.New("not a yes or no answer")
+}
+
 func (ui *userInterface) yesNo(question string) bool {
 	ui.pushPrompt(question + " (Y/N)? ")
 	defer ui.popPrompt()
@@ -195,15 +210,10 @@ func (ui *userInterface) yesNo(question string) bool {
 		if err != nil {
 			continue
 		}
-		switch strings.TrimSpace(strings.ToLower(line)) {
-		case "y":
-			fallthrough
-		case "yes":
-			return true
-		case "n":
-			fallthrough
-		case "no":
-			return false
+		if yesno, err := isYesNo(line); err != nil {
+			continue
+		} else {
+			return yesno
 		}
 	}
 }
