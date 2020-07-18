@@ -43,15 +43,15 @@ func initBKT() {
 type answer struct {
 	questionShortName string // Here because of JSON unmarshaling.
 	question          Question
-	subQuestion			string
+	subQuestion       *subQuestion
 	correct           bool
 }
 
 type studentState struct {
-	answers []*answer
-	burnt   map[Question]interface{} // A set, basically.
-	scores  map[*Concept]float64
-	content *Content
+	answers      []*answer
+	burnt        map[Question]interface{} // A set, basically.
+	scores       map[*Concept]float64
+	content      *Content
 	nextQuestion Question // for debugger, not used otherwise.
 }
 
@@ -64,11 +64,11 @@ func newStudentState(content *Content) *studentState {
 	}
 }
 
-func (s *studentState) registerAnswer(q Question, subQuestion string, correct bool) {
+func (s *studentState) registerAnswer(q Question, sq *subQuestion, correct bool) {
 	s.answers = append(s.answers, &answer{
 		questionShortName: q.getShortName(),
 		question:          q,
-		subQuestion: subQuestion,
+		subQuestion:       sq,
 		correct:           correct})
 	s.burn(q)
 }
@@ -81,7 +81,11 @@ func (a *answer) MarshalJSON() ([]byte, error) {
 	m := make(map[string]interface{})
 	m["shortName"] = a.questionShortName
 	m["correct"] = a.correct
-	m["subQuestion"] = a.subQuestion
+	if a.subQuestion == nil {
+		m["subQuestion"] = ""
+	} else {
+		m["subQuestion"] = a.subQuestion.tag
+	}
 
 	return json.Marshal(m)
 }
@@ -102,7 +106,13 @@ func (a *answer) UnmarshalJSON(b []byte) error {
 		return errors.New("data format error (shortName)")
 	}
 	if v, ok := m["subQuestion"].(string); ok {
-		a.subQuestion = v
+		if v == "" {
+			a.subQuestion = nil
+		} else {
+			sq, ok := sqMap[v]
+			CHECK(ok, "subquestion %s not found", v)
+			a.subQuestion = sq
+		}
 	} else {
 		return errors.New("data format error (subQuestion)")
 	}
@@ -164,7 +174,13 @@ func (s *studentState) writeTrainhmmInput() (string, error) {
 		} else {
 			columns = append(columns, incorrect)
 		}
-		columns = append(columns, "student", fmt.Sprintf("%s#%s", a.questionShortName, a.subQuestion))
+		var tag string
+		if a.subQuestion == nil {
+			tag = a.questionShortName
+		} else {
+			tag = fmt.Sprintf("%s#%s", a.questionShortName, a.subQuestion.tag)
+		}
+		columns = append(columns, "student", tag)
 		names := make([]string, 0)
 		for _, c := range a.question.getTrainingConcepts(a.subQuestion) {
 			names = append(names, c.shortName)
@@ -255,7 +271,7 @@ func (s *studentState) train() error {
 // --------------------------------------------------------------------
 func (s *studentState) avg(q Question) float64 {
 	total := 0.0
-	concepts := q.getTrainingConcepts("")
+	concepts := q.getTrainingConcepts(nil)
 	for _, c := range concepts {
 		total += s.scores[c]
 	}
@@ -264,7 +280,7 @@ func (s *studentState) avg(q Question) float64 {
 
 func (s *studentState) conceptsNotMastered(cas *Case) []*Concept {
 	result := make([]*Concept, 0)
-	for _, c := range cas.getTrainingConcepts("") {
+	for _, c := range cas.getTrainingConcepts(nil) {
 		if s.scores[c] < threshold {
 			result = append(result, c)
 		}
@@ -286,7 +302,7 @@ func (s *studentState) selectQuestion() Question {
 		if _, ok := s.burnt[q]; ok {
 			continue
 		}
-		concepts := q.getTrainingConcepts("")
+		concepts := q.getTrainingConcepts(nil)
 		if len(concepts) == 0 {
 			possibles = append(possibles, q)
 			continue
@@ -310,7 +326,7 @@ func (s *studentState) selectQuestion() Question {
 	if trace != nil {
 		for _, q := range possibles {
 			trace.print("%32s", q.getShortName())
-			for _, c := range q.getTrainingConcepts("") {
+			for _, c := range q.getTrainingConcepts(nil) {
 				trace.print("%20s(%f)", c.shortName, s.scores[c])
 			}
 			trace.println("  avg=%f", s.avg(q))
@@ -318,5 +334,3 @@ func (s *studentState) selectQuestion() Question {
 	}
 	return possibles[0]
 }
-
-

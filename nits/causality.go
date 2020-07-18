@@ -1,6 +1,11 @@
 package nits
 
-const causeInFactSubQuestion = "causeInFact"
+var (
+	causeInFact = (&subQuestion{
+		tag: "causeInFact",
+		concepts: []*Concept{CauseInFact},
+	}).add()
+)
 
 func isParentOf(suspectedParent, child Event) bool {
 	if suspectedParent == child {
@@ -25,12 +30,12 @@ func (p *preprocessedCase) isCauseInFact(dam InjuryOrDamage, event Event) bool {
 
 func (c *Case) askCauseInFact(ui *userInterface, state *studentState) bool {
 	dam := c.preproc.randomInjuryOrDamage()
-	event := c.preproc.randomEvent()
-	rightAnswer := c.preproc.isCauseInFact(dam, event)
+	act := c.preproc.randomAct()
+	rightAnswer := c.preproc.isCauseInFact(dam, act)
 
 	displayQuestion := func([]string) bool {
-		ui.println("In this case, is the event:")
-		ui.println(event.getDescription())
+		ui.println("In this case, is the act:")
+		ui.println(act.Description)
 		ui.println("a cause-in-fact of this injury or property damage:")
 		ui.println(dam.GetDescription())
 		ui.newline()
@@ -60,7 +65,7 @@ func (c *Case) askCauseInFact(ui *userInterface, state *studentState) bool {
 			continue
 		}
 		ui.println("Correct :-)")
-		state.registerAnswer(c, causeInFactSubQuestion, attempts == 0)
+		state.registerAnswer(c, causeInFact, attempts == 0)
 		return false
 	}
 }

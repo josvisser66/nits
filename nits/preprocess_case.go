@@ -107,13 +107,15 @@ func (p *preprocessedCase) findEvent(shortName string) Event {
 	return nil
 }
 
-func (p *preprocessedCase) randomEvent() Event {
-	events := make([]Event, 0, len(p.events))
+func (p *preprocessedCase) randomAct() *Act {
+	acts := make([]*Act, 0, len(p.events))
 	for event := range p.events {
-		events = append(events, event)
+		if act, ok := event.(*Act); ok {
+			acts = append(acts, act)
+		}
 	}
 
-	return events[rand.Int()%len(events)]
+	return acts[rand.Int()%len(acts)]
 }
 
 func (p *preprocessedCase) randomInjuryOrDamage() InjuryOrDamage {
