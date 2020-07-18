@@ -11,7 +11,7 @@ func isParentOf(suspectedParent, child Event) bool {
 	if suspectedParent == child {
 		return true
 	}
-	for _, cause := range child.getCauses() {
+	for _, cause := range child.getDirectCauses() {
 		if isParentOf(suspectedParent, cause) {
 			return true
 		}
@@ -20,8 +20,8 @@ func isParentOf(suspectedParent, child Event) bool {
 }
 
 func (p *preprocessedCase) isCauseInFact(dam InjuryOrDamage, event Event) bool {
-	for _, e := range dam.getCauses() {
-		if isParentOf(e, event) {
+	for _, e := range dam.getDirectCauses() {
+		if isParentOf(event, e) {
 			return true
 		}
 	}

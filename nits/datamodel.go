@@ -55,7 +55,7 @@ type Event interface {
 	getDuty() *Duty
 	getNegPerSe() *BrokenLegalRequirement
 	getInjuriesOrDamages() []InjuryOrDamage
-	getCauses() []Event
+	getDirectCauses() []Event
 	getClaims() []*Claim
 	addCause(e Event)
 }
@@ -68,7 +68,7 @@ type PassiveEvent struct {
 	NegPerSe          *BrokenLegalRequirement
 	InjuriesOrDamages []InjuryOrDamage
 	Claims            []*Claim
-	causes            []Event
+	directCauses      []Event
 }
 
 func (pe *PassiveEvent) getLabel() string {
@@ -79,10 +79,10 @@ func (pe *PassiveEvent) addCause(event Event) {
 	if event == nil {
 		return
 	}
-	if pe.causes == nil {
-		pe.causes = make([]Event, 0, 1)
+	if pe.directCauses == nil {
+		pe.directCauses = make([]Event, 0, 1)
 	}
-	pe.causes = append(pe.causes, event)
+	pe.directCauses = append(pe.directCauses, event)
 }
 
 func (pe *PassiveEvent) getShortName() string {
@@ -113,8 +113,8 @@ func (pe *PassiveEvent) getClaims() []*Claim {
 	return pe.Claims
 }
 
-func (pe *PassiveEvent) getCauses() []Event {
-	return pe.causes
+func (pe *PassiveEvent) getDirectCauses() []Event {
+	return pe.directCauses
 }
 
 // --------------------------------------------------------------------
@@ -127,7 +127,7 @@ type Act struct {
 	NegPerSe          *BrokenLegalRequirement
 	InjuriesOrDamages []InjuryOrDamage
 	Claims            []*Claim
-	causes            []Event
+	directCauses      []Event
 }
 
 func (a *Act) getLabel() string {
@@ -138,10 +138,10 @@ func (a *Act) addCause(event Event) {
 	if event == nil {
 		return
 	}
-	if a.causes == nil {
-		a.causes = make([]Event, 0, 1)
+	if a.directCauses == nil {
+		a.directCauses = make([]Event, 0, 1)
 	}
-	a.causes = append(a.causes, event)
+	a.directCauses = append(a.directCauses, event)
 }
 
 func (a *Act) getShortName() string {
@@ -172,8 +172,8 @@ func (a *Act) getClaims() []*Claim {
 	return a.Claims
 }
 
-func (a *Act) getCauses() []Event {
-	return a.causes
+func (a *Act) getDirectCauses() []Event {
+	return a.directCauses
 }
 
 // --------------------------------------------------------------------
@@ -187,14 +187,14 @@ type InjuryOrDamage interface {
 	GetDescription() string
 	GetPersons() []*Person
 	getLabel() string
-	getCauses() []Event
+	getDirectCauses() []Event
 	addCause(event Event)
 }
 
 type BodilyInjury struct {
-	Description string
-	Persons     []*Person
-	causes      []Event
+	Description  string
+	Persons      []*Person
+	directCauses []Event
 }
 
 func (b *BodilyInjury) GetDescription() string {
@@ -210,14 +210,14 @@ func (b *BodilyInjury) GetPersons() []*Person {
 }
 
 func (b *BodilyInjury) addCause(event Event) {
-	if b.causes == nil {
-		b.causes = make([]Event, 0, 1)
+	if b.directCauses == nil {
+		b.directCauses = make([]Event, 0, 1)
 	}
-	b.causes = append(b.causes, event)
+	b.directCauses = append(b.directCauses, event)
 }
 
-func (b *BodilyInjury) getCauses() []Event {
-	return b.causes
+func (b *BodilyInjury) getDirectCauses() []Event {
+	return b.directCauses
 }
 
 type EmotionalHarm struct {
@@ -230,9 +230,9 @@ func (e *EmotionalHarm) GetInjuryDescription() string {
 }
 
 type PropertyDamage struct {
-	Description string
-	Persons     []*Person
-	causes      []Event
+	Description  string
+	Persons      []*Person
+	directCauses []Event
 }
 
 func (p *PropertyDamage) GetDescription() string {
@@ -248,14 +248,14 @@ func (p *PropertyDamage) GetPersons() []*Person {
 }
 
 func (p *PropertyDamage) addCause(event Event) {
-	if p.causes == nil {
-		p.causes = make([]Event, 0, 1)
+	if p.directCauses == nil {
+		p.directCauses = make([]Event, 0, 1)
 	}
-	p.causes = append(p.causes, event)
+	p.directCauses = append(p.directCauses, event)
 }
 
-func (p *PropertyDamage) getCauses() []Event {
-	return p.causes
+func (p *PropertyDamage) getDirectCauses() []Event {
+	return p.directCauses
 }
 
 // --------------------------------------------------------------------
