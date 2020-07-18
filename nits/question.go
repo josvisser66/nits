@@ -8,7 +8,7 @@ import (
 type Question interface {
 	getShortName() string
 	getConcepts() []*Concept
-	getTrainingConcepts(sq *subQuestion) []*Concept
+	getTrainingConcepts(sq subQuestion) []*Concept
 	check()
 	ask(ui *userInterface, state *studentState)
 }
@@ -64,7 +64,7 @@ func (q *MultipleChoiceQuestion) getConcepts() []*Concept {
 	return conceptMapToSlice(m)
 }
 
-func (q *MultipleChoiceQuestion) getTrainingConcepts(sq *subQuestion) []*Concept {
+func (q *MultipleChoiceQuestion) getTrainingConcepts(sq subQuestion) []*Concept {
 	CHECK(sq == nil, "unexpected subQuestion for MultipleChoiceQuestion")
 	m := make(map[*Concept]interface{})
 
@@ -216,7 +216,7 @@ func (q *PropsQuestion) getConcepts() []*Concept {
 	return conceptMapToSlice(m)
 }
 
-func (q *PropsQuestion) getTrainingConcepts(sq *subQuestion) []*Concept {
+func (q *PropsQuestion) getTrainingConcepts(sq subQuestion) []*Concept {
 	CHECK(sq == nil, "unexpected subQuestion for PropsQuestion")
 	return q.getConcepts()
 }

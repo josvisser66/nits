@@ -43,7 +43,7 @@ func initBKT() {
 type answer struct {
 	questionShortName string // Here because of JSON unmarshaling.
 	question          Question
-	subQuestion       *subQuestion
+	subQuestion       subQuestion
 	correct           bool
 }
 
@@ -64,7 +64,7 @@ func newStudentState(content *Content) *studentState {
 	}
 }
 
-func (s *studentState) registerAnswer(q Question, sq *subQuestion, correct bool) {
+func (s *studentState) registerAnswer(q Question, sq subQuestion, correct bool) {
 	s.answers = append(s.answers, &answer{
 		questionShortName: q.getShortName(),
 		question:          q,
@@ -84,7 +84,7 @@ func (a *answer) MarshalJSON() ([]byte, error) {
 	if a.subQuestion == nil {
 		m["subQuestion"] = ""
 	} else {
-		m["subQuestion"] = a.subQuestion.tag
+		m["subQuestion"] = a.subQuestion.getTag()
 	}
 
 	return json.Marshal(m)
@@ -178,7 +178,7 @@ func (s *studentState) writeTrainhmmInput() (string, error) {
 		if a.subQuestion == nil {
 			tag = a.questionShortName
 		} else {
-			tag = fmt.Sprintf("%s#%s", a.questionShortName, a.subQuestion.tag)
+			tag = fmt.Sprintf("%s#%s", a.questionShortName, a.subQuestion.getTag())
 		}
 		columns = append(columns, "student", tag)
 		names := make([]string, 0)
@@ -278,9 +278,9 @@ func (s *studentState) avg(q Question) float64 {
 	return total / float64(len(concepts))
 }
 
-func (s *studentState) conceptsNotMastered(cas *Case) []*Concept {
+func (s *studentState) conceptsNotMastered(concepts []*Concept) []*Concept {
 	result := make([]*Concept, 0)
-	for _, c := range cas.getTrainingConcepts(nil) {
+	for _, c := range concepts {
 		if s.scores[c] < threshold {
 			result = append(result, c)
 		}

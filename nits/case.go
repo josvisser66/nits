@@ -12,15 +12,16 @@ type Case struct {
 	preproc *preprocessedCase
 }
 
-type subQuestion struct {
-	tag string
-	concepts []*Concept
+type subQuestion interface {
+	getTag() string
+	getConcepts() []*Concept
+	ask(*Case, *userInterface, *studentState) bool
 }
 
-var sqMap = make(map[string]*subQuestion)
+var sqMap = make(map[string]subQuestion)
 
-func (sq *subQuestion) add() *subQuestion {
-	sqMap[sq.tag] = sq
+func addSubQuestion(sq subQuestion) subQuestion {
+	sqMap[sq.getTag()] = sq
 	return sq
 }
 
@@ -32,15 +33,15 @@ func (c *Case) getConcepts() []*Concept {
 	return nil
 }
 
-func (c *Case) getTrainingConcepts(sq *subQuestion) []*Concept {
+func (c *Case) getTrainingConcepts(sq subQuestion) []*Concept {
 	if sq != nil {
-		return sq.concepts
+		return sq.getConcepts()
 	}
 
 	m := make(map[*Concept]interface{})
 
 	for _, sq := range sqMap {
-		for _, c := range sq.concepts {
+		for _, c := range sq.getConcepts() {
 			m[c] = nil
 		}
 	}
@@ -71,34 +72,50 @@ func pushSubQuestionCommandContext(state *studentState, ui *userInterface, displ
 	})
 }
 
+func (c *Case) selectSubQuestion(state *studentState, done map[subQuestion]int) subQuestion {
+	possibles := make([]subQuestion, 0)
+
+	for _, sq := range sqMap {
+		nm := state.conceptsNotMastered(sq.getConcepts())
+		if len(nm) > 0 && done[sq] < 2 {
+			possibles = append(possibles, sq)
+		}
+	}
+
+	if len(possibles) == 0 {
+		return nil
+	}
+
+	return possibles[rand.Int() % len(possibles)]
+}
+
 func (c *Case) ask(ui *userInterface, state *studentState) {
 	preprocess(c)
-	displayQuestion := func([]string) bool {
+	displayCase := func([]string) bool {
 		ui.printParagraphs(c.Text)
 		ui.newline()
 		return false
 	}
 
-	displayQuestion(nil)
-	pushCommandContext("Answering a case question", state, ui, c, displayQuestion)
+	displayCase(nil)
+	pushCommandContext("Answering a case question", state, ui, c, displayCase)
 	ui.pushPrompt("Your answer? ")
 	defer ui.popCommandContext()
 	defer ui.popPrompt()
 
+	done := make(map[subQuestion]int)
+
 	for {
-		var ret bool
-		concepts := state.conceptsNotMastered(c)
-		concept := concepts[rand.Int() % len(concepts)]
-		switch concept {
-		case CauseInFact1:
-			ret = c.askCauseInFact(ui, state)
-		default:
-			ui.println("Nothing left to ask about this case.")
-			ret = true
+		sq := c.selectSubQuestion(state, done)
+		if sq == nil {
+			ui.println("Nothing left to ask in this case.")
+			return
 		}
+		ret := sq.ask(c, ui, state)
 		if ret {
 			return
 		}
+		done[sq]++
 	}
 }
 
