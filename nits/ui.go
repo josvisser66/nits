@@ -228,11 +228,10 @@ func (ui *userInterface) getInput() ([]string, bool) {
 		} else if err == io.EOF {
 			ui.error("Please use exit to leave NITS.")
 		}
-		words := strings.Split(strings.ToLower(strings.TrimSpace(line)), " ")
-		if len(words) == 0 {
+		if line == "" {
 			continue
 		}
-
+		words := strings.Split(strings.ToLower(strings.TrimSpace(line)), " ")
 		didExec, ret := ui.maybeExecuteCommand(words)
 		if ret {
 			return words, ret
@@ -254,7 +253,10 @@ func (ui *userInterface) getAnswer(answers answerMap) (string, bool) {
 		if ret {
 			return "", ret
 		}
-		if len(words) != 1 {
+		if len(words) == 0 {
+			continue
+		}
+		if len(words) > 1 {
 			ui.error("Please provide a one-word answer.")
 			continue
 		}

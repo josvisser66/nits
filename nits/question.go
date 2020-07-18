@@ -122,6 +122,17 @@ func pushCommandContext(name string, state *studentState, ui *userInterface, q Q
 	})
 }
 
+func makeAnswerMap(n int) answerMap {
+	m := make(answerMap)
+
+	for i:=1; i <= n; i++ {
+		r := string('a' + i - 1)
+		m[r] = []string{r}
+	}
+
+	return m
+}
+
 func (q *MultipleChoiceQuestion) ask(ui *userInterface, state *studentState) {
 	answers := make([]*Answer, 0, len(q.Answers))
 	var noneOfTheAbove *Answer
@@ -153,21 +164,14 @@ func (q *MultipleChoiceQuestion) ask(ui *userInterface, state *studentState) {
 	defer ui.popCommandContext()
 
 	attempts := 0
+	possibleAnswers := makeAnswerMap(len(answers))
 
 	for {
-		words, ret := ui.getInput()
+		s, ret := ui.getAnswer(possibleAnswers)
 		if ret {
 			return
 		}
-		if len(words) > 1 || len(words[0]) > 1 {
-			ui.error("Please provide a one letter answer.")
-			continue
-		}
-		answer := words[0][0] - 'a'
-		if int(answer) >= len(answers) {
-			ui.error("Please enter an answer from A to %c.", rune('A'+len(answers)-1))
-			continue
-		}
+		answer := s[0] - 'a'
 		if answers[answer].Correct {
 			ui.println("Correct :-)")
 			state.registerAnswer(q, nil, attempts == 0)
@@ -292,23 +296,18 @@ func (q *PropsQuestion) ask(ui *userInterface, state *studentState) {
 	pushCommandContext("Answering a proposition question", state, ui, q, displayQuestion)
 	defer ui.popPrompt()
 	defer ui.popCommandContext()
+
 	attempts := 0
+	possibleAnswers := makeAnswerMap(1 << len(q.Propositions))
+
 
 outer:
 	for {
-		words, ret := ui.getInput()
+		s, ret := ui.getAnswer(possibleAnswers)
 		if ret {
 			return
 		}
-		if len(words) > 1 || len(words[0]) > 1 {
-			ui.error("Please provide a one letter answer.")
-			continue
-		}
-		answer := words[0][0] - 'a'
-		if int(answer) >= len(q.Propositions)<<1 {
-			ui.error("Please enter an answer from A to %c", rune('A'+len(q.Propositions)<<1-1))
-			continue
-		}
+		answer := s[0] - 'a'
 		for _, prop := range q.Propositions {
 			if (answer%2 == 0 && prop.True) || (answer%2 == 1 && !prop.True) {
 				ui.println("Incorrect :-(")

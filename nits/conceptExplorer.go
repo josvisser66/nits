@@ -1,6 +1,7 @@
 package nits
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -83,32 +84,19 @@ func ExploreConcepts(ui *userInterface, b ConceptBucket) {
 	ui.newline()
 
 	showConcepts(nil)
-	help := func() {
-		ui.println("Please enter the number of the concept you want to explore or 'done'.")
+	possibleAnswers := make(answerMap)
+
+	for i:=1; i<=len(concepts); i++ {
+		r := fmt.Sprint("%d", i)
+		possibleAnswers[r] = []string{r}
 	}
 
 	for {
-		words, ret := ui.getInput()
+		answer, ret := ui.getAnswer(possibleAnswers)
 		if ret {
 			return
 		}
-
-		if len(words) > 1 {
-			help()
-			continue
-		}
-
-		n, err := strconv.Atoi(words[0])
-		if err != nil {
-			help()
-			continue
-		}
-
-		if n < 1 || n > len(concepts) {
-			help()
-			continue
-		}
-
+		n, _ := strconv.Atoi(answer)
 		ui.explain(concepts[n-1].explanation)
 		ui.newline()
 	}
