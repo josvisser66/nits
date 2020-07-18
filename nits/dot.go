@@ -8,10 +8,13 @@ import (
 )
 
 const (
-	shapePerson         = "septagon"
+	shapePerson         = "diamond"
+	shapeClaim          = "trapezium"
 	shapeEvent          = "ellipse"
+	shapeAct            = "box"
 	shapeDuty           = "hexagon"
-	shapeInjuryOrDamage = "egg"
+	shapeInjuryOrDamage = "house"
+	shapeNegPerSe       = "parallelogram"
 )
 
 func makeDot(state *studentState, withSkills bool) (string, error) {
@@ -146,9 +149,28 @@ func dotPersons(f *os.File, persons map[*Person]interface{}) error {
 	return nil
 }
 
+func dotClaims(f *os.File, claims map[*Claim]interface{}) error {
+	for claim := range claims {
+		if err := draw(f, "claim", shapeClaim, claim); err != nil {
+			return err
+		}
+		if _, err := f.WriteString(fmt.Sprintf("  person_%p -> claim_%p [style=dotted];\n", claim.Person, claim)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func getEventShape(e Event) string {
+	if _, ok := e.(*Act); ok {
+		return shapeAct
+	}
+	return shapeEvent
+}
+
 func dotEvents(f *os.File, events map[Event]interface{}) error {
 	for event := range events {
-		if err := draw(f, "event", shapeEvent, event); err != nil {
+		if err := draw(f, "event", getEventShape(event), event); err != nil {
 			return err
 		}
 	}
@@ -164,16 +186,15 @@ func dotEvents(f *os.File, events map[Event]interface{}) error {
 				return err
 			}
 		}
-		if event.getIrrelevantCause() != nil {
-			if err := draw(f, "irrcause", shapeEvent, event.getIrrelevantCause()); err != nil {
-				return err
-			}
-			if _, err := f.WriteString(fmt.Sprintf("  irrcause_%p -> event_%p [style=dotted];\n", event.getIrrelevantCause(), event)); err != nil {
-				return err
+		if event.getClaims() != nil {
+			for _, claim := range event.getClaims() {
+				if _, err := f.WriteString(fmt.Sprintf("  claim%p -> event_%p [style=dotted];\n", claim, event)); err != nil {
+					return err
+				}
 			}
 		}
 		if event.getNegPerSe() != nil {
-			if err := draw(f, "negperse", shapeEvent, event.getNegPerSe()); err != nil {
+			if err := draw(f, "negperse", shapeNegPerSe, event.getNegPerSe()); err != nil {
 				return err
 			}
 			if _, err := f.WriteString(fmt.Sprintf("  negperse_%p -> event_%p [style=dotted];\n", event.getNegPerSe(), event)); err != nil {

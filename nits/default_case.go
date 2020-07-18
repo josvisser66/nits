@@ -44,16 +44,20 @@ func DefaultCase() *Case {
 
 	rookeGetsThrownFromTheCar.NegPerSe = rookeShouldHaveWornASeatbelt
 
-	brucesCarPlowsIntoAshtonsCar := &PassiveEvent{
-		shortName: "plows",
-		Description:       "Bruce's car plows into Ashton's car",
+	brucesCarPlowsIntoAshtonsCar := &Act{
+		shortName:         "plows",
+		Person:            bruce,
+		Description:       "Bruce plows his car into Ashton's car",
 		Consequences:      []Event{rookeGetsThrownFromTheCar},
 		InjuriesOrDamages: []InjuryOrDamage{brucesDamage},
-		IrrelevantCause: &IrrelevantCause{
-			Description: "Bruce claims that he did not see Ashton's car because of the truck in front of him",
-			Explanation: &Explanation{
-				Text: []string{
-					"Explanation of why this is irrelevant",
+		Claims: []*Claim{
+			{
+				Person:      bruce,
+				Description: "Bruce claims that he did not see Ashton's car because of the truck in front of him",
+				Explanation: &Explanation{
+					Text: []string{
+						"Explanation of why this is irrelevant",
+					},
 				},
 			},
 		},
@@ -72,31 +76,36 @@ func DefaultCase() *Case {
 
 	brucesCarPlowsIntoAshtonsCar.NegPerSe = bruceHadDrankTooMuch
 
-	ashtonDials911 := &PassiveEvent{
+	ashtonDials911 := &Act{
+		Person:      ashton,
 		Description: "Ashton dials 911 and requests fire department and police assistance",
 	}
-	ashtonFleesTheCar := &PassiveEvent{
+	ashtonFleesTheCar := &Act{
+		Person:       ashton,
 		Description:  "Ashton abandons the car",
 		Consequences: []Event{brucesCarPlowsIntoAshtonsCar},
 	}
 	carDies := &PassiveEvent{
-		shortName: "car_dies",
+		shortName:    "car_dies",
 		Description:  "The engine of Ashton's car dies",
 		Consequences: []Event{ashtonFleesTheCar, ashtonDials911},
 	}
 	smokeUnderHood := &PassiveEvent{
 		Description: "Smoke comes out from under the hood of Ashton's car",
 	}
-	continuesDriving := &PassiveEvent{
+	continuesDriving := &Act{
+		Person:       ashton,
 		Description:  "Ashton continues to drive her car",
 		Consequences: []Event{smokeUnderHood, carDies},
 	}
-	demiGivesBadAdvice := &PassiveEvent{
+	demiGivesBadAdvice := &Act{
+		Person:       demi,
 		Description:  "Demi advises Ashton to continue driving and to bring the car in at his convenience",
 		Consequences: []Event{continuesDriving},
 		Duty:         giveGoodAdvice,
 	}
-	askingAdvice := &PassiveEvent{
+	askingAdvice := &Act{
+		Person:       ashton,
 		Description:  "Ashton calls Demi and asks for advice",
 		Consequences: []Event{demiGivesBadAdvice},
 	}
@@ -108,7 +117,7 @@ func DefaultCase() *Case {
 		Description:  "Ashton's car is low on on oil",
 		Consequences: []Event{oilLightGoesOn},
 	}
-	badOilChange := &PassiveEvent{
+	badOilChange := &Act{
 		Description:  "Demi (or Mayko) performs a bad oil change on Ashton's car",
 		Consequences: []Event{lowOilPressure},
 		Duty:         doAGoodOilChange,
@@ -148,8 +157,7 @@ func DefaultCase() *Case {
 				"because it ran out of oil. Demi had failed to replace the oil pan properly and all the oil in the " +
 				"car had drained out.",
 		},
-    ShortName:  "case_ashton_car_crash",
+		ShortName:  "case_ashton_car_crash",
 		RootEvents: []Event{badOilChange},
 	}
 }
-

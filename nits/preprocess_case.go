@@ -6,14 +6,16 @@ type preprocessedCase struct {
 	events                 map[Event]interface{}
 	persons                map[*Person]interface{}
 	duties                 map[*Duty]interface{}
-	irrelevantCauses       map[*IrrelevantCause]interface{}
+	claims                 map[*Claim]interface{}
 	injuriesOrDamages      map[InjuryOrDamage]interface{}
 	brokenLegalRequirement map[*BrokenLegalRequirement]interface{}
 }
 
-func (p *preprocessedCase) ppIrrelevantCause(event Event, cause *IrrelevantCause) {
-	cause.event = event
-	p.irrelevantCauses[cause] = nil
+func (p *preprocessedCase) ppClaims(event Event, claims []*Claim) {
+	for _, claim := range claims {
+		claim.event = event
+		p.claims[claim] = nil
+	}
 }
 
 func (p *preprocessedCase) ppPersons(persons []*Person) {
@@ -60,8 +62,8 @@ func (p *preprocessedCase) ppEvent(parent Event, e Event) {
 		p.ppInjuriesOrDamages(e, e.getInjuriesOrDamages())
 	}
 
-	if e.getIrrelevantCause() != nil {
-		p.ppIrrelevantCause(e, e.getIrrelevantCause())
+	if e.getClaims() != nil {
+		p.ppClaims(e, e.getClaims())
 	}
 
 	if e.getNegPerSe() != nil {
@@ -87,7 +89,7 @@ func preprocess(c *Case) *preprocessedCase {
 		events:                 make(map[Event]interface{}),
 		persons:                make(map[*Person]interface{}),
 		duties:                 make(map[*Duty]interface{}),
-		irrelevantCauses:       make(map[*IrrelevantCause]interface{}),
+		claims:                 make(map[*Claim]interface{}),
 		injuriesOrDamages:      make(map[InjuryOrDamage]interface{}),
 		brokenLegalRequirement: make(map[*BrokenLegalRequirement]interface{}),
 	}

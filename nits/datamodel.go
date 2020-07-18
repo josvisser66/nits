@@ -35,14 +35,15 @@ func (d *Duty) getLabel() string {
 }
 
 // --------------------------------------------------------------------
-type IrrelevantCause struct {
+type Claim struct {
+	Person      *Person
 	Description string
 	Explanation *Explanation
 	event       Event
 }
 
-func (i *IrrelevantCause) getLabel() string {
-	return i.Description
+func (c *Claim) getLabel() string {
+	return c.Description
 }
 
 // --------------------------------------------------------------------
@@ -53,9 +54,9 @@ type Event interface {
 	getConsequences() []Event
 	getDuty() *Duty
 	getNegPerSe() *BrokenLegalRequirement
-	getIrrelevantCause() *IrrelevantCause
 	getInjuriesOrDamages() []InjuryOrDamage
 	getCauses() []Event
+	getClaims() []*Claim
 	addCause(e Event)
 }
 
@@ -65,8 +66,8 @@ type PassiveEvent struct {
 	Consequences      []Event
 	Duty              *Duty
 	NegPerSe          *BrokenLegalRequirement
-	IrrelevantCause   *IrrelevantCause
 	InjuriesOrDamages []InjuryOrDamage
+	Claims            []*Claim
 	causes            []Event
 }
 
@@ -104,12 +105,12 @@ func (pe *PassiveEvent) getNegPerSe() *BrokenLegalRequirement {
 	return pe.NegPerSe
 }
 
-func (pe *PassiveEvent) getIrrelevantCause() *IrrelevantCause {
-	return pe.IrrelevantCause
-}
-
 func (pe *PassiveEvent) getInjuriesOrDamages() []InjuryOrDamage {
 	return pe.InjuriesOrDamages
+}
+
+func (pe *PassiveEvent) getClaims() []*Claim {
+	return pe.Claims
 }
 
 func (pe *PassiveEvent) getCauses() []Event {
@@ -117,6 +118,66 @@ func (pe *PassiveEvent) getCauses() []Event {
 }
 
 // --------------------------------------------------------------------
+type Act struct {
+	shortName         string
+	Person            *Person
+	Description       string
+	Consequences      []Event
+	Duty              *Duty
+	NegPerSe          *BrokenLegalRequirement
+	InjuriesOrDamages []InjuryOrDamage
+	Claims            []*Claim
+	causes            []Event
+}
+
+func (a *Act) getLabel() string {
+	return a.Description
+}
+
+func (a *Act) addCause(event Event) {
+	if event == nil {
+		return
+	}
+	if a.causes == nil {
+		a.causes = make([]Event, 0, 1)
+	}
+	a.causes = append(a.causes, event)
+}
+
+func (a *Act) getShortName() string {
+	return a.shortName
+}
+
+func (a *Act) getDescription() string {
+	return a.Description
+}
+
+func (a *Act) getConsequences() []Event {
+	return a.Consequences
+}
+
+func (a *Act) getDuty() *Duty {
+	return a.Duty
+}
+
+func (a *Act) getNegPerSe() *BrokenLegalRequirement {
+	return a.NegPerSe
+}
+
+func (a *Act) getInjuriesOrDamages() []InjuryOrDamage {
+	return a.InjuriesOrDamages
+}
+
+func (a *Act) getClaims() []*Claim {
+	return a.Claims
+}
+
+func (a *Act) getCauses() []Event {
+	return a.causes
+}
+
+// --------------------------------------------------------------------
+// Deprecated?
 type Cause interface {
 	GetCauseDescription() string
 }
