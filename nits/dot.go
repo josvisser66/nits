@@ -146,7 +146,7 @@ func dotPersons(f *os.File, persons map[*Person]interface{}) error {
 	return nil
 }
 
-func dotEvents(f *os.File, events map[*Event]interface{}) error {
+func dotEvents(f *os.File, events map[Event]interface{}) error {
 	for event := range events {
 		if err := draw(f, "event", shapeEvent, event); err != nil {
 			return err
@@ -154,38 +154,38 @@ func dotEvents(f *os.File, events map[*Event]interface{}) error {
 	}
 
 	for event := range events {
-		for _, consequence := range event.Consequences {
+		for _, consequence := range event.getConsequences() {
 			if _, err := f.WriteString(fmt.Sprintf("  event_%p -> event_%p;\n", event, consequence)); err != nil {
 				return err
 			}
 		}
-		if event.Duty != nil {
-			if _, err := f.WriteString(fmt.Sprintf("  duty_%p -> event_%p [style=dotted];\n", event.Duty, event)); err != nil {
+		if event.getDuty() != nil {
+			if _, err := f.WriteString(fmt.Sprintf("  duty_%p -> event_%p [style=dotted];\n", event.getDuty(), event)); err != nil {
 				return err
 			}
 		}
-		if event.IrrelevantCause != nil {
-			if err := draw(f, "irrcause", shapeEvent, event.IrrelevantCause); err != nil {
+		if event.getIrrelevantCause() != nil {
+			if err := draw(f, "irrcause", shapeEvent, event.getIrrelevantCause()); err != nil {
 				return err
 			}
-			if _, err := f.WriteString(fmt.Sprintf("  irrcause_%p -> event_%p [style=dotted];\n", event.IrrelevantCause, event)); err != nil {
+			if _, err := f.WriteString(fmt.Sprintf("  irrcause_%p -> event_%p [style=dotted];\n", event.getIrrelevantCause(), event)); err != nil {
 				return err
 			}
 		}
-		if event.NegPerSe != nil {
-			if err := draw(f, "negperse", shapeEvent, event.NegPerSe); err != nil {
+		if event.getNegPerSe() != nil {
+			if err := draw(f, "negperse", shapeEvent, event.getNegPerSe()); err != nil {
 				return err
 			}
-			if _, err := f.WriteString(fmt.Sprintf("  negperse_%p -> event_%p [style=dotted];\n", event.NegPerSe, event)); err != nil {
+			if _, err := f.WriteString(fmt.Sprintf("  negperse_%p -> event_%p [style=dotted];\n", event.getNegPerSe(), event)); err != nil {
 				return err
 			}
-			for _, person := range event.NegPerSe.Persons {
-				if _, err := f.WriteString(fmt.Sprintf("  person_%p -> negperse_%p [style=dotted];\n", person, event.NegPerSe)); err != nil {
+			for _, person := range event.getNegPerSe().Persons {
+				if _, err := f.WriteString(fmt.Sprintf("  person_%p -> negperse_%p [style=dotted];\n", person, event.getNegPerSe())); err != nil {
 					return err
 				}
 			}
 		}
-		for _, dam := range event.InjuriesOrDamages {
+		for _, dam := range event.getInjuriesOrDamages() {
 			if _, err := f.WriteString(fmt.Sprintf("  event_%p -> dam_%p;\n", event, dam)); err != nil {
 				return err
 			}

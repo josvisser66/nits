@@ -13,9 +13,9 @@ func (p *Person) getLabel() string {
 type BrokenLegalRequirement struct {
 	Description  string
 	Persons      []*Person
-	Consequences []*Event
+	Consequences []Event
 	Explanation  *Explanation
-	event        *Event
+	event        Event
 }
 
 func (b *BrokenLegalRequirement) getLabel() string {
@@ -27,7 +27,7 @@ type Duty struct {
 	Description string
 	OwedFrom    []*Person
 	OwedTo      []*Person
-	event       *Event
+	event       Event
 }
 
 func (d *Duty) getLabel() string {
@@ -38,7 +38,7 @@ func (d *Duty) getLabel() string {
 type IrrelevantCause struct {
 	Description string
 	Explanation *Explanation
-	event       *Event
+	event       Event
 }
 
 func (i *IrrelevantCause) getLabel() string {
@@ -46,33 +46,74 @@ func (i *IrrelevantCause) getLabel() string {
 }
 
 // --------------------------------------------------------------------
-type Event struct {
-	shortName		  string
+type Event interface {
+	getLabel() string // For dot drawings.
+	getShortName() string
+	getDescription() string
+	getConsequences() []Event
+	getDuty() *Duty
+	getNegPerSe() *BrokenLegalRequirement
+	getIrrelevantCause() *IrrelevantCause
+	getInjuriesOrDamages() []InjuryOrDamage
+	getCauses() []Event
+	addCause(e Event)
+}
+
+type PassiveEvent struct {
+	shortName         string
 	Description       string
-	Consequences      []*Event
+	Consequences      []Event
 	Duty              *Duty
 	NegPerSe          *BrokenLegalRequirement
 	IrrelevantCause   *IrrelevantCause
 	InjuriesOrDamages []InjuryOrDamage
-	causes            []*Event
+	causes            []Event
 }
 
-func (e *Event) getLabel() string {
-	return e.Description
+func (pe *PassiveEvent) getLabel() string {
+	return pe.Description
 }
 
-func (e *Event) addCause(event *Event) {
+func (pe *PassiveEvent) addCause(event Event) {
 	if event == nil {
 		return
 	}
-	if e.causes == nil {
-		e.causes = make([]*Event,0,1)
+	if pe.causes == nil {
+		pe.causes = make([]Event, 0, 1)
 	}
-	e.causes = append(e.causes, event)
+	pe.causes = append(pe.causes, event)
 }
 
-func (e *Event) getCauses() []*Event {
-	return e.causes
+func (pe *PassiveEvent) getShortName() string {
+	return pe.shortName
+}
+
+func (pe *PassiveEvent) getDescription() string {
+	return pe.Description
+}
+
+func (pe *PassiveEvent) getConsequences() []Event {
+	return pe.Consequences
+}
+
+func (pe *PassiveEvent) getDuty() *Duty {
+	return pe.Duty
+}
+
+func (pe *PassiveEvent) getNegPerSe() *BrokenLegalRequirement {
+	return pe.NegPerSe
+}
+
+func (pe *PassiveEvent) getIrrelevantCause() *IrrelevantCause {
+	return pe.IrrelevantCause
+}
+
+func (pe *PassiveEvent) getInjuriesOrDamages() []InjuryOrDamage {
+	return pe.InjuriesOrDamages
+}
+
+func (pe *PassiveEvent) getCauses() []Event {
+	return pe.causes
 }
 
 // --------------------------------------------------------------------
@@ -85,14 +126,14 @@ type InjuryOrDamage interface {
 	GetDescription() string
 	GetPersons() []*Person
 	getLabel() string
-	getCauses() []*Event
-	addCause(event *Event)
+	getCauses() []Event
+	addCause(event Event)
 }
 
 type BodilyInjury struct {
 	Description string
 	Persons     []*Person
-	causes      []*Event
+	causes      []Event
 }
 
 func (b *BodilyInjury) GetDescription() string {
@@ -107,14 +148,14 @@ func (b *BodilyInjury) GetPersons() []*Person {
 	return b.Persons
 }
 
-func (b *BodilyInjury) addCause(event *Event) {
+func (b *BodilyInjury) addCause(event Event) {
 	if b.causes == nil {
-		b.causes = make([]*Event, 0, 1)
+		b.causes = make([]Event, 0, 1)
 	}
 	b.causes = append(b.causes, event)
 }
 
-func (b *BodilyInjury) getCauses() []*Event {
+func (b *BodilyInjury) getCauses() []Event {
 	return b.causes
 }
 
@@ -130,7 +171,7 @@ func (e *EmotionalHarm) GetInjuryDescription() string {
 type PropertyDamage struct {
 	Description string
 	Persons     []*Person
-	causes      []*Event
+	causes      []Event
 }
 
 func (p *PropertyDamage) GetDescription() string {
@@ -145,14 +186,14 @@ func (p *PropertyDamage) GetPersons() []*Person {
 	return p.Persons
 }
 
-func (p *PropertyDamage) addCause(event *Event) {
+func (p *PropertyDamage) addCause(event Event) {
 	if p.causes == nil {
-		p.causes = make([]*Event, 0, 1)
+		p.causes = make([]Event, 0, 1)
 	}
 	p.causes = append(p.causes, event)
 }
 
-func (p *PropertyDamage) getCauses() []*Event {
+func (p *PropertyDamage) getCauses() []Event {
 	return p.causes
 }
 

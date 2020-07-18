@@ -9,7 +9,7 @@ import (
 type Case struct {
 	Text []string
 	ShortName  string
-	RootEvents []*Event
+	RootEvents []Event
 	preproc *preprocessedCase
 }
 

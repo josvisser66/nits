@@ -2,22 +2,21 @@ package nits
 
 const causeInFactSubQuestion = "causeInFact"
 
-func (e *Event) isParentOf(event *Event) bool {
-	if e == event {
+func isParentOf(suspectedParent, child Event) bool {
+	if suspectedParent == child {
 		return true
 	}
-	for _, cause := range event.causes {
-		if e.isParentOf(cause) {
+	for _, cause := range child.getCauses() {
+		if isParentOf(suspectedParent, cause) {
 			return true
 		}
 	}
 	return false
 }
 
-func (p *preprocessedCase) isCauseInFact(dam InjuryOrDamage, event *Event) bool {
-	trace.println("Is <%s> a parent of <%s>?", event.Description, dam.GetDescription())
+func (p *preprocessedCase) isCauseInFact(dam InjuryOrDamage, event Event) bool {
 	for _, e := range dam.getCauses() {
-		if event.isParentOf(e) {
+		if isParentOf(e, event) {
 			return true
 		}
 	}
@@ -31,7 +30,7 @@ func (c *Case) askCauseInFact(ui *userInterface, state *studentState) bool {
 
 	displayQuestion := func([]string) bool {
 		ui.println("In this case, is the event:")
-		ui.println(event.Description)
+		ui.println(event.getDescription())
 		ui.println("a cause-in-fact of this injury or property damage:")
 		ui.println(dam.GetDescription())
 		ui.newline()
