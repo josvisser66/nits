@@ -9,12 +9,12 @@ func GetContent() *Content {
 			&MultipleChoiceQuestion{
 				ShortName: "mc_reasonable_foreseeability1",
 				Question:  []string{"The concept of reasonable foreseeability is satisfied only if:"},
-				Concepts:  []*Concept{Foreseeability},
+				Concepts:  []*Concept{Foreseeability1},
 				Answers: []*Answer{
 					{
 						Text: "The plaintiff has proved, beyond a reasonable doubt, that he or she in fact " +
 							"suffered a loss that was caused the defendant's carelessness.",
-						Concepts: []*Concept{PreponderanceOfTheElements},
+						Concepts: []*Concept{PreponderanceOfTheElements1},
 					},
 					{
 						Text:    "The defendant's behavior was virtually certain to inflict a loss on the plaintiff.",
@@ -35,7 +35,7 @@ func GetContent() *Content {
 			},
 			&MultipleChoiceQuestion{
 				ShortName: "mc_pure_compneg1",
-				Concepts:  []*Concept{PureComparativeNegligence},
+				Concepts:  []*Concept{PureComparativeNegligence1},
 				Question: []string{
 					"Assume that the state of East Delaware has a statute under which Ellen would recover $60,000 " +
 						"of her $300,000 in damages because a jury found her to be 80%% negligent in the accident " +
@@ -45,30 +45,30 @@ func GetContent() *Content {
 				Answers: []*Answer{
 					{
 						Text:     "The defense of pure comparative negligence.",
-						Concepts: []*Concept{PureComparativeNegligence},
+						Concepts: []*Concept{PureComparativeNegligence1},
 						Correct:  true,
 					},
 					{
 						Text:     "The defense of modified comparative negligence",
-						Concepts: []*Concept{ModifiedComparativeNegligence},
+						Concepts: []*Concept{ModifiedComparativeNegligence1},
 					},
 					{
 						Text:     "The defense of contributory negligence.",
-						Concepts: []*Concept{ContributoryNegligence},
+						Concepts: []*Concept{ContributoryNegligence1},
 					},
 					{
 						Text:     "The defense of assumption of risk.",
-						Concepts: []*Concept{AssumptionOfRisk},
+						Concepts: []*Concept{AssumptionOfRisk1},
 					},
 					{
 						Text:     "The defense of negligence per se",
-						Concepts: []*Concept{NegligencePerSe},
+						Concepts: []*Concept{NegligencePerSe1},
 					},
 				},
 			},
 			&MultipleChoiceQuestion{
 				ShortName: "mc_mrbean_contribneg1",
-				Concepts:  []*Concept{ContributoryNegligence},
+				Concepts:  []*Concept{ContributoryNegligence1},
 				Question: []string{
 					"In response to a number of accidents involving pedestrians, a city enacted a statute making it " +
 						"illegal to walk through the business district other than on the sidewalk. The city also " +
@@ -83,12 +83,12 @@ func GetContent() *Content {
 				Answers: []*Answer{
 					{
 						Text:     "It will bar his recovery as a matter of law.",
-						Concepts: []*Concept{ContributoryNegligence, NegligencePerSe},
+						Concepts: []*Concept{ContributoryNegligence1, NegligencePerSe1},
 						Correct:  true,
 					},
 					{
 						Text:     "It will reduce his recovery.",
-						Concepts: []*Concept{ComparativeNegligence},
+						Concepts: []*Concept{ComparativeNegligence1},
 					},
 					{
 						Text: "It may be considered by the trier of fact on the issue of the taxi driver's liability.",
@@ -103,12 +103,12 @@ func GetContent() *Content {
 				Propositions: []*Proposition{
 					{
 						Proposition: "Under contributory negligence, if you contribute to your injury, you cannot recover damages.",
-						Concepts:    []*Concept{ContributoryNegligence},
+						Concepts:    []*Concept{ContributoryNegligence1},
 						True:        true,
 					},
 					{
 						Proposition: "Under comparative negligence, if you contribute to your injury, you cannot recover damages.",
-						Concepts:    []*Concept{ComparativeNegligence},
+						Concepts:    []*Concept{ComparativeNegligence1},
 					},
 				},
 			},
@@ -126,20 +126,20 @@ func GetContent() *Content {
 				Answers: []*Answer{
 					{
 						Text:     "Contributory negligence",
-						Concepts: []*Concept{ContributoryNegligence},
+						Concepts: []*Concept{ContributoryNegligence1},
 					},
 					{
 						Text:     "Negligence per se",
-						Concepts: []*Concept{NegligencePerSe},
+						Concepts: []*Concept{NegligencePerSe1},
 					},
 					{
 						Text:     "Res ipsa loquitur",
-						Concepts: []*Concept{ResIpsaLoquitur},
+						Concepts: []*Concept{ResIpsaLoquitur1},
 						Correct:  true,
 					},
 					{
 						Text:     "Comparative negligence",
-						Concepts: []*Concept{ComparativeNegligence},
+						Concepts: []*Concept{ComparativeNegligence1},
 					},
 				},
 			},
@@ -149,20 +149,20 @@ func GetContent() *Content {
 				Answers: []*Answer{
 					{
 						Text:     "Contributory negligence",
-						Concepts: []*Concept{ContributoryNegligence},
+						Concepts: []*Concept{ContributoryNegligence1},
 					},
 					{
 						Text:     "Assumption of the risk",
-						Concepts: []*Concept{AssumptionOfRisk},
+						Concepts: []*Concept{AssumptionOfRisk1},
 					},
 					{
 						Text:     "Vicarious liability",
-						Concepts: []*Concept{VicariousLiability},
+						Concepts: []*Concept{VicariousLiability1},
 						Correct:  true,
 					},
 					{
 						Text:     "Comparative negligence",
-						Concepts: []*Concept{ComparativeNegligence},
+						Concepts: []*Concept{ComparativeNegligence1},
 					},
 				},
 			},
@@ -178,19 +178,19 @@ func GetContent() *Content {
 				Answers: []*Answer{
 					{
 						Text:     "Punitive damages",
-						Concepts: []*Concept{PunitiveDamages},
+						Concepts: []*Concept{PunitiveDamages1},
 						Correct:  true,
 					},
 					{
 						Text:     "Economic damages",
-						Concepts: []*Concept{EconomicDamages},
+						Concepts: []*Concept{EconomicDamages1},
 					},
 					{
 						Text: "Non-economic damages",
 					},
 					{
 						Text:     "Collateral source payments",
-						Concepts: []*Concept{CollateralSourcePayments},
+						Concepts: []*Concept{CollateralSourcePayments1},
 					},
 				},
 			},
@@ -202,7 +202,7 @@ func GetContent() *Content {
 						"His actual damages were $20,000. How much will Bruce be able to recover from the " +
 						"defendant?",
 				},
-				Concepts: []*Concept{PureComparativeNegligence},
+				Concepts: []*Concept{PureComparativeNegligence1},
 				Answers: []*Answer{
 					{
 						Text: "$0",

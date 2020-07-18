@@ -160,12 +160,12 @@ func (q *MultipleChoiceQuestion) ask(ui *userInterface, state *studentState) {
 			return
 		}
 		if len(words) > 1 || len(words[0]) > 1 {
-			ui.println("Please provide a one letter answer.")
+			ui.error("Please provide a one letter answer.")
 			continue
 		}
 		answer := words[0][0] - 'a'
 		if int(answer) >= len(answers) {
-			ui.println("Please enter an answer from A to %c.", rune('A'+len(answers)-1))
+			ui.error("Please enter an answer from A to %c.", rune('A'+len(answers)-1))
 			continue
 		}
 		if answers[answer].Correct {
@@ -301,12 +301,12 @@ outer:
 			return
 		}
 		if len(words) > 1 || len(words[0]) > 1 {
-			ui.println("Please provide a one letter answer.")
+			ui.error("Please provide a one letter answer.")
 			continue
 		}
 		answer := words[0][0] - 'a'
 		if int(answer) >= len(q.Propositions)<<1 {
-			ui.println("Please enter an answer from A to %c", rune('A'+len(q.Propositions)<<1-1))
+			ui.error("Please enter an answer from A to %c", rune('A'+len(q.Propositions)<<1-1))
 			continue
 		}
 		for _, prop := range q.Propositions {

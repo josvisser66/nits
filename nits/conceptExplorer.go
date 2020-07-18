@@ -13,7 +13,7 @@ type ConceptBucket interface {
 
 func findConcept(concepts []*Concept, name string) *Concept {
 	for _, c := range concepts {
-		if c.name == name {
+		if c.name == name || c.shortName == name {
 			return c
 		}
 	}
@@ -25,7 +25,7 @@ func (ui *userInterface) explainConcept(words []string, concepts []*Concept) {
 	name := strings.Join(words[1:], " ")
 	concept := findConcept(concepts, name)
 	if concept == nil {
-		ui.println("Concept '%s' not found.", name)
+		ui.error("Concept '%s' not found.", name)
 		ui.newline()
 		return
 	}

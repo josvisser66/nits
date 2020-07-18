@@ -67,7 +67,7 @@ func nextQuestion(ui *userInterface, state *studentState, words []string) {
 	if len(words) <2 {
 		state.nextQuestion = nil
 	} else if q := state.content.findQuestion(words[1]); q == nil {
-		ui.println("Question not found.")
+		ui.error("Question not found.")
 	} else {
 		state.nextQuestion = q
 	}
@@ -141,13 +141,17 @@ func debug(ui *userInterface, state *studentState, words []string) bool {
 				Aliases: []string{"dot"},
 				Help:    "Generates dot file for content and concepts.",
 				Executor: func([]string) bool {
-					fname, err := makeDot(state, ui.yesNo("Augment concepts with skill level ratios"))
+					annotate, ret := ui.yesNo("Augment concepts with skill level ratios")
+					if ret {
+						return ret
+					}
+					fname, err := makeDot(state, annotate)
 					if err != nil {
-						ui.println("error: %s", err)
+						ui.error("error: %s", err)
 						return false
 					}
 					if err := showDot(ui, fname); err != nil {
-						ui.println("error: %s", err)
+						ui.error("error: %s", err)
 					}
 					return false
 				},
@@ -158,11 +162,11 @@ func debug(ui *userInterface, state *studentState, words []string) bool {
 				Executor: func(words []string) bool {
 					fname, err := makeCaseDot(state, words)
 					if err != nil {
-						ui.println("error: %s", err)
+						ui.error("error: %s", err)
 						return false
 					}
 					if err := showDot(ui, fname); err != nil {
-						ui.println("error: %s", err)
+						ui.error("error: %s", err)
 					}
 					return false
 				},
@@ -182,7 +186,7 @@ func debug(ui *userInterface, state *studentState, words []string) bool {
 						trace = nil
 						state = "off"
 					} else {
-						ui.println("on or off, please")
+						ui.error("on or off, please")
 						return false
 					}
 					ui.println("tracing is %s", state)
@@ -195,7 +199,7 @@ func debug(ui *userInterface, state *studentState, words []string) bool {
 				Executor: func([]string) bool {
 					q := state.selectQuestion()
 					if q == nil {
-						ui.println("No question selected!")
+						ui.error("No question selected!")
 					}
 					return false
 				},
@@ -209,7 +213,7 @@ func debug(ui *userInterface, state *studentState, words []string) bool {
 	if len(words) > 1 {
 		var ret, didExec bool
 		if didExec, ret = ui.maybeExecuteCommand(words[1:]); !didExec {
-			ui.println("Unknown debugging command.")
+			ui.error("Unknown debugging command.")
 		}
 		return ret
 	}
@@ -219,6 +223,6 @@ func debug(ui *userInterface, state *studentState, words []string) bool {
 		if ret {
 			return ret
 		}
-		ui.println("Please enter one of the debugger's commands. Use ? for help.")
+		ui.error("Please enter one of the debugger's commands. Use ? for help.")
 	}
 }

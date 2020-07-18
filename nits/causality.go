@@ -3,7 +3,7 @@ package nits
 var (
 	causeInFact = (&subQuestion{
 		tag: "causeInFact",
-		concepts: []*Concept{CauseInFact},
+		concepts: []*Concept{CauseInFact1},
 	}).add()
 )
 
@@ -49,17 +49,11 @@ func (c *Case) askCauseInFact(ui *userInterface, state *studentState) bool {
 	attempts := 0
 
 	for {
-		words, ret := ui.getInput()
+		answer, ret := ui.yesNo("Your answer")
 		if ret {
 			return ret
 		}
-		if len(words) == 0 {
-			continue
-		}
-		if answer, err := isYesNo(words[0]); err != nil {
-			ui.println("Please enter a yes or no answer")
-			continue
-		} else if answer != rightAnswer {
+		if answer != rightAnswer {
 			ui.println("Please try again :-(")
 			attempts++
 			continue

@@ -34,7 +34,7 @@ func Run(content *Content) {
 				Global:  true,
 				Help:    "Exits NITS.",
 				Executor: func(line []string) bool {
-					if ui.yesNo("Are you sure you want to quit") {
+					if sure, _ := ui.yesNo("Are you sure you want to quit"); sure {
 						state.saveUserData()
 						os.Exit(0)
 					}
@@ -56,7 +56,7 @@ func Run(content *Content) {
 				Help:    "Load user data",
 				Executor: func([]string) bool {
 					if err := state.loadUserData(); err != nil {
-						ui.println("Loading failed: %s", err)
+						ui.error("Loading failed: %s", err)
 					}
 					return false
 				},
@@ -67,7 +67,7 @@ func Run(content *Content) {
 				Help:    "Save user data",
 				Executor: func([]string) bool {
 					if err := state.saveUserData(); err != nil {
-						ui.println("Saving failed: %s", err)
+						ui.error("Saving failed: %s", err)
 					}
 					return false
 				},
@@ -77,7 +77,7 @@ func Run(content *Content) {
 	defer ui.popCommandContext()
 
 	if err := state.loadUserData(); err != nil {
-		ui.println("User data *not* loaded: %s", err)
+		ui.error("User data *not* loaded: %s", err)
 	} else {
 		ui.println("User data restored.")
 	}

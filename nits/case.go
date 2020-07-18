@@ -90,7 +90,7 @@ func (c *Case) ask(ui *userInterface, state *studentState) {
 		concepts := state.conceptsNotMastered(c)
 		concept := concepts[rand.Int() % len(concepts)]
 		switch concept {
-		case CauseInFact:
+		case CauseInFact1:
 			ret = c.askCauseInFact(ui, state)
 		default:
 			ui.println("Nothing left to ask about this case.")

@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 )
 
@@ -139,6 +140,12 @@ func (ui *userInterface) println(s string, args ...interface{}) {
 	ui.newline()
 }
 
+func (ui *userInterface) error(s string, args ...interface{}) {
+	ui.print("*** ")
+	ui.print(s, args...)
+	ui.newline()
+}
+
 func (ui *userInterface) print(s string, args ...interface{}) {
 	t := fmt.Sprintf(s, args...)
 	term := ui.rl.Terminal
@@ -201,21 +208,16 @@ func isYesNo(line string) (bool, error) {
 	return false, errors.New("not a yes or no answer")
 }
 
-func (ui *userInterface) yesNo(question string) bool {
+func (ui *userInterface) yesNo(question string) (bool, bool) {
 	ui.pushPrompt(question + " (Y/N)? ")
 	defer ui.popPrompt()
 
-	for {
-		line, err := ui.rl.Readline()
-		if err != nil {
-			continue
-		}
-		if yesno, err := isYesNo(line); err != nil {
-			continue
-		} else {
-			return yesno
-		}
-	}
+	answer, ret := ui.getAnswer(
+		answerMap{
+			"yes": []string{"y(es)?"},
+			"no":  []string{"no?"},
+		})
+	return answer == "yes", ret
 }
 
 func (ui *userInterface) getInput() ([]string, bool) {
@@ -224,7 +226,7 @@ func (ui *userInterface) getInput() ([]string, bool) {
 		if err == readline.ErrInterrupt {
 			continue
 		} else if err == io.EOF {
-			ui.println("Please use exit to leave NITS.")
+			ui.error("Please use exit to leave NITS.")
 		}
 		words := strings.Split(strings.ToLower(strings.TrimSpace(line)), " ")
 		if len(words) == 0 {
@@ -241,6 +243,32 @@ func (ui *userInterface) getInput() ([]string, bool) {
 		}
 
 		return words, false
+	}
+}
+
+type answerMap map[string][]string
+
+func (ui *userInterface) getAnswer(answers answerMap) (string, bool) {
+	for {
+		words, ret := ui.getInput()
+		if ret {
+			return "", ret
+		}
+		if len(words) != 1 {
+			ui.error("Please provide a one-word answer.")
+			continue
+		}
+		a := strings.ToLower(words[0])
+		for key, vec := range answers {
+			for _, re := range vec {
+				r, err := regexp.Compile(re)
+				CHECK(err == nil, "regexp compilation error '%s': %s", re, err)
+				if r.MatchString(a) {
+					return key, false
+				}
+			}
+		}
+		ui.error("Invalid answer. Please try again.")
 	}
 }
 

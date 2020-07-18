@@ -32,14 +32,14 @@ func (c *Concept) GetReferenceText() string {
 }
 
 var (
-	Foreseeability = (&Concept{
-		name:      "foreseeability",
-		shortName: "foreseeability",
+	Foreseeability1 = (&Concept{
+		name:      "foreseeability (basic)",
+		shortName: "foreseeability1",
 		level:     1,
 	}).add()
-	CauseInFact = (&Concept{
-		name: "cause in fact",
-		shortName: "causeinfact",
+	CauseInFact1 = (&Concept{
+		name: "cause in fact (basic)",
+		shortName: "causeinfact1",
 		level: 1,
 		explanation: &Explanation{
 			Text:       []string{
@@ -50,9 +50,9 @@ var (
 			},
 		},
 	}).add()
-	ComparativeNegligence = (&Concept{
+	ComparativeNegligence1 = (&Concept{
 		name:      "comparative negligence",
-		shortName: "compneg",
+		shortName: "compneg1",
 		level:     1,
 		hints: []string{
 			"Is the plaintiff negligent themselves?",
@@ -67,9 +67,9 @@ var (
 			},
 		},
 	}).add()
-	ModifiedComparativeNegligence = (&Concept{
+	ModifiedComparativeNegligence1 = (&Concept{
 		name:      "modified comparative negligence",
-		shortName: "modcompneg",
+		shortName: "modcompneg1",
 		level:     1,
 		explanation: &Explanation{Text: []string{
 			"The doctrine of modified comparative negligence is a form of comparative negligence where there is " +
@@ -81,9 +81,9 @@ var (
 			"What is the difference between this and pure comparative negligence?",
 		},
 	}).add()
-	PureComparativeNegligence = (&Concept{
+	PureComparativeNegligence1 = (&Concept{
 		name:      "pure comparative negligence",
-		shortName: "purecompneg",
+		shortName: "purecompneg1",
 		level:     1,
 		explanation: &Explanation{Text: []string{
 			"In pure comparative negligence there is no threshold for barring the plaintiff for recovering " +
@@ -96,24 +96,24 @@ var (
 			"Is there a threshold for the extent (percentage) that the plaintiff is responsible?",
 		},
 	}).add()
-	ContributoryNegligence = (&Concept{
+	ContributoryNegligence1 = (&Concept{
 		name:      "contributory negligence",
-		shortName: "contribneg",
+		shortName: "contribneg1",
 		level:     1,
 	}).add()
-	PreponderanceOfTheElements = (&Concept{
+	PreponderanceOfTheElements1 = (&Concept{
 		name:      "preponderance of the elements",
-		shortName: "prepond",
+		shortName: "prepond1",
 		level:     1,
 	}).add()
-	AssumptionOfRisk = (&Concept{
+	AssumptionOfRisk1 = (&Concept{
 		name:      "assumption of risk",
-		shortName: "assumprisk",
+		shortName: "assumprisk1",
 		level:     1,
 	}).add()
-	NegligencePerSe = (&Concept{
+	NegligencePerSe1 = (&Concept{
 		name:      "negligence per se",
-		shortName: "negperse",
+		shortName: "negperse1",
 		level:     1,
 		explanation: &Explanation{
 			Text: []string{
@@ -129,9 +129,9 @@ var (
 			},
 		},
 	}).add()
-	ResIpsaLoquitur = (&Concept{
-			name:      "res ipsa loquitur",
-			shortName: "resipsa",
+	ResIpsaLoquitur1 = (&Concept{
+			name:      "res ipsa loquitur (basic)",
+			shortName: "resipsa1",
 			level:     1,
 			explanation: &Explanation{
 				Text: []string{
@@ -142,9 +142,9 @@ var (
 				},
 			},
 		}).add()
-	VicariousLiability = (&Concept{
+	VicariousLiability1 = (&Concept{
 		name:        "vicarious liability",
-		shortName:   "vicliab",
+		shortName:   "vicliab1",
 		level:       1,
 		explanation: &Explanation{
 			Text: []string{
@@ -153,9 +153,9 @@ var (
 			},
 		},
 	}).add()
-	PunitiveDamages = (&Concept{
+	PunitiveDamages1 = (&Concept{
 		name: "punitive damages",
-		shortName: "pundam",
+		shortName: "pundam1",
 		level: 1,
 		explanation: &Explanation{
 			Text: []string{
@@ -164,9 +164,9 @@ var (
 			},
 		},
 	}).add()
-	EconomicDamages = (&Concept{
+	EconomicDamages1 = (&Concept{
 		name:        "economic damages",
-		shortName:   "ecodam",
+		shortName:   "ecodam1",
 		level:       1,
 		explanation: &Explanation{
 			Text:[]string{
@@ -175,9 +175,9 @@ var (
 			},
 		},
 	}).add()
-	CollateralSourcePayments = (&Concept{
+	CollateralSourcePayments1 = (&Concept{
 		name:        "collateral source payments",
-		shortName:   "collsrcpay",
+		shortName:   "collsrcpay1",
 		level:       1,
 		explanation: &Explanation{
 			Text:[]string{
@@ -198,24 +198,26 @@ var (
 func initConcepts() {
 	// Links all the contributory and comparative negligence concepts to
 	// one another.
-	ComparativeNegligence.related = []*Concept{
-		ModifiedComparativeNegligence,
-		PureComparativeNegligence,
-		ContributoryNegligence,
+	ComparativeNegligence1.related = []*Concept{
+		ModifiedComparativeNegligence1,
+		PureComparativeNegligence1,
+		ContributoryNegligence1,
 	}
-	PureComparativeNegligence.related = []*Concept{
-		ComparativeNegligence,
-		ModifiedComparativeNegligence,
-		ContributoryNegligence,
+	PureComparativeNegligence1.related = []*Concept{
+		ComparativeNegligence1,
+		ModifiedComparativeNegligence1,
+		ContributoryNegligence1,
 	}
-	ModifiedComparativeNegligence.related = []*Concept{
-		ComparativeNegligence,
-		PureComparativeNegligence,
-		ContributoryNegligence}
-	ContributoryNegligence.related = []*Concept{
-		ComparativeNegligence,
-		ModifiedComparativeNegligence,
-		PureComparativeNegligence}
+	ModifiedComparativeNegligence1.related = []*Concept{
+		ComparativeNegligence1,
+		PureComparativeNegligence1,
+		ContributoryNegligence1,
+	}
+	ContributoryNegligence1.related = []*Concept{
+		ComparativeNegligence1,
+		ModifiedComparativeNegligence1,
+		PureComparativeNegligence1,
+	}
 
 	for _, c := range allConcepts {
 		c.sortRelatedConcepts()
