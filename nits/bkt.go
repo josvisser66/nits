@@ -20,7 +20,11 @@ const (
 	correct   = "1"
 	incorrect = "2"
 	separator = "~"
-	threshold = 0.9
+	threshold = 0.95 // When do we consider a concept mastered?
+	pInit     = 0.1  // Probability that concept was known a-priory.
+	pLearn    = 0.2  // Probability that concept will transfer to mastered after a practice attempt.
+	pSlip     = 0.1  // Probability that a mastered skill is applied incorrectly.
+	pGuess    = 0.5  // Probability that an unmastered skill is applied incorrectly.
 )
 
 var trainhmmPath = "/Users/josv/standard-bkt/trainhmm"
@@ -204,6 +208,7 @@ func (s *studentState) runTrainhmm(td string) error {
 	cmd := exec.Command(
 		trainhmmPath,
 		"-p", "2",
+		"-0", fmt.Sprintf("%f,1.0,%f,%f,%f", pInit, pLearn, 1-pSlip, pGuess),
 		"-d", separator,
 		path.Join(td, "input"),
 		path.Join(td, "model.txt"),

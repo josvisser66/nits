@@ -263,9 +263,7 @@ func (ui *userInterface) getAnswer(answers answerMap) (string, bool) {
 		a := strings.ToLower(words[0])
 		for key, vec := range answers {
 			for _, re := range vec {
-				r, err := regexp.Compile(re)
-				CHECK(err == nil, "regexp compilation error '%s': %s", re, err)
-				if r.MatchString(a) {
+				if regexp.MustCompile(fmt.Sprintf("^%s$", re)).MatchString(a) {
 					return key, false
 				}
 			}
