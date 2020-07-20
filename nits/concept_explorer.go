@@ -87,7 +87,7 @@ func ExploreConcepts(ui *userInterface, b ConceptBucket) {
 	possibleAnswers := make(answerMap)
 
 	for i:=1; i<=len(concepts); i++ {
-		r := fmt.Sprint("%d", i)
+		r := fmt.Sprintf("%d", i)
 		possibleAnswers[r] = []string{r}
 	}
 
