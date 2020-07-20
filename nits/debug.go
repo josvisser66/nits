@@ -135,6 +135,10 @@ func debug(ui *userInterface, state *studentState, words []string) bool {
 				Aliases: []string{"scores"},
 				Help:    "Shows all concepts and the student's skill levels.",
 				Executor: func([]string) bool {
+					if len(state.scores) == 0 {
+						ui.println("This student is from Barcelona.")
+						return false
+					}
 					for concept, skillLevel := range state.scores {
 						ui.println("%-20s: %f", concept.shortName, skillLevel)
 					}
