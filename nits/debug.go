@@ -112,6 +112,10 @@ func debug(ui *userInterface, state *studentState, words []string) bool {
 				Aliases: []string{"train"},
 				Help:    "Runs trainhmm.",
 				Executor: func([]string) bool {
+					if len(state.answers) == 0 {
+						ui.println("Nothing to train.")
+						return false
+					}
 					td, err := state.writeTrainhmmInput()
 					ui.println("Temporary directory: td=%s; err=%v", td, err)
 					if err != nil {
