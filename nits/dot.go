@@ -76,23 +76,21 @@ func makeCaseDot(state *studentState, words []string) (string, error) {
 	if err != nil {
 		return f.Name(), err
 	}
-
 	if err := dotPersons(f, pp.persons); err != nil {
 		return "", err
 	}
-
+	if err := dotClaims(f, pp.claims); err != nil {
+		return "", err
+	}
 	if err := dotDuties(f, pp.duties); err != nil {
 		return "", err
 	}
-
 	if err := dotInjuryOrDamages(f, pp.injuriesOrDamages); err != nil {
 		return "", err
 	}
-
 	if err := dotEvents(f, pp.events); err != nil {
 		return "", err
 	}
-
 	_, err = f.WriteString("}\n")
 
 	return f.Name(), err
@@ -188,7 +186,7 @@ func dotEvents(f *os.File, events map[Event]interface{}) error {
 		}
 		if event.getClaims() != nil {
 			for _, claim := range event.getClaims() {
-				if _, err := f.WriteString(fmt.Sprintf("  claim%p -> event_%p [style=dotted];\n", claim, event)); err != nil {
+				if _, err := f.WriteString(fmt.Sprintf("  claim_%p -> event_%p [style=dotted];\n", claim, event)); err != nil {
 					return err
 				}
 			}
