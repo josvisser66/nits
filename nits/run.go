@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"runtime"
 	"time"
 )
 
@@ -19,6 +20,7 @@ func Run(content *Content) {
 	println()
 	println("Use ? to get help.")
 	println()
+	println("Running on", runtime.GOOS)
 
 	initBKT()
 	initConcepts()

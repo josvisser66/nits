@@ -11,6 +11,8 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -27,20 +29,44 @@ const (
 	pGuess    = 0.5  // Probability that an unmastered skill is applied incorrectly.
 )
 
-var trainhmmPath = "/Users/josv/standard-bkt/trainhmm"
+var trainhmmPath string
 
 // --------------------------------------------------------------------
-func initBKT() {
-	fi, err := os.Stat(trainhmmPath)
+func try(hmmPath string) error {
+	fi, err := os.Stat(hmmPath)
 	if err != nil {
-		panic(fmt.Sprintf("Cannot stat: %s ", trainhmmPath))
+		return err
 	}
 	if fi.Mode()&os.ModeType != 0 {
-		panic(fmt.Sprintf("%s: illegal file type", trainhmmPath))
+		return errors.New(fmt.Sprintf("%s: illegal file type", hmmPath))
 	}
 	if fi.Mode()&0555 != 0555 {
-		panic(fmt.Sprintf("%s: illegal access mode (executable?)", trainhmmPath))
+		return errors.New(fmt.Sprintf("%s: illegal access mode (executable?)", hmmPath))
 	}
+	println("HMM training binary is in", hmmPath)
+	trainhmmPath = hmmPath
+	return nil
+}
+
+func initBKT() {
+  var err error
+	errors := make([]error, 0)
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		panic("Can't determine the directory where the executable lives")
+	}
+	if err = try(path.Join(dir, fmt.Sprintf("trainhmm-%s", runtime.GOOS))); err == nil {
+		return
+	}
+	errors = append(errors, err)
+	if err = try(path.Join(getUserHomeDir(), "standard-bkt", "trainhmm")); err == nil {
+		return
+	}
+	errors = append(errors, err)
+	for _, err := range errors {
+		println(err.Error())
+	}
+	panic("Cannot find working trainhmm binary")
 }
 
 // --------------------------------------------------------------------
