@@ -6,17 +6,17 @@ import (
 	"strings"
 )
 
-type primaFacieSubQuestion struct {}
+type defendantsSubQuestion struct {}
 
-func (p *primaFacieSubQuestion) getTag() string {
-	return "primaFacie"
+func (p *defendantsSubQuestion) getTag() string {
+	return "defendants"
 }
 
-func (p *primaFacieSubQuestion) getConcepts() []*Concept {
-	return []*Concept{primaFacie2}
+func (p *defendantsSubQuestion) getConcepts() []*Concept {
+	return []*Concept{defendants1}
 }
 
-var _ = addSubQuestion(&primaFacieSubQuestion{})
+var _ = addSubQuestion(&defendantsSubQuestion{})
 
 func intersectPersons(a, b []*Person) []*Person {
 	m := make(map[*Person]int)
@@ -65,7 +65,7 @@ func findDuties(dam InjuryOrDamage, causes []Event) []*Duty {
 	return result
 }
 
-func (p *primaFacieSubQuestion) ask(c *Case, ui *userInterface, state *studentState) bool {
+func (p *defendantsSubQuestion) ask(c *Case, ui *userInterface, state *studentState) bool {
 	dams := make([]InjuryOrDamage, 0, len(c.preproc.injuriesOrDamages))
 	for dam, _ := range c.preproc.injuriesOrDamages {
 		dams = append(dams, dam)

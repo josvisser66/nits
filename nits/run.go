@@ -100,7 +100,6 @@ func Run(content *Content) {
 }
 
 func (c *Content) check() {
-	checkConcepts()
 	m := make(map[string]interface{})
 
 	for _, q := range c.Questions {

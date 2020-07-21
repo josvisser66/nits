@@ -32,6 +32,31 @@ func (c *Concept) GetReferenceText() string {
 }
 
 var (
+	Defendant0 = (&Concept{
+		name:      "defendant",
+		shortName: "defendant0",
+		level:     0,
+		related:   []*Concept{Plaintiff0},
+		explanation: &Explanation{
+			Text: []string{
+				"Defendants are the people that are being sued. Typically these are the people " +
+					"who are claimed to be responsible for the damages of the plaintiff.",
+			},
+		},
+	}).add()
+	Plaintiff0 = (&Concept{
+		name:      "plaintiff",
+		shortName: "plaintiff0",
+		level:     0,
+		related:   []*Concept{Defendant0},
+		explanation: &Explanation{
+			Text: []string{
+				"Plaintiffs are the people that sue. Typically these are the people " +
+					"that have suffered some form of damage and who are trying to recover " +
+					"these damages from the defendants.",
+			},
+		},
+	}).add()
 	Foreseeability1 = (&Concept{
 		name:      "foreseeability (basic)",
 		shortName: "foreseeability1",
@@ -54,6 +79,7 @@ var (
 		name:      "comparative negligence",
 		shortName: "compneg1",
 		level:     1,
+		related:   []*Concept{ModifiedComparativeNegligence1, PureComparativeNegligence1, ContributoryNegligence1},
 		hints: []string{
 			"Is the plaintiff negligent themselves?",
 		},
@@ -71,6 +97,7 @@ var (
 		name:      "modified comparative negligence",
 		shortName: "modcompneg1",
 		level:     1,
+		related:   []*Concept{ComparativeNegligence1, PureComparativeNegligence1, ContributoryNegligence1},
 		explanation: &Explanation{Text: []string{
 			"The doctrine of modified comparative negligence is a form of comparative negligence where there is " +
 				"a threshold for the plaintiff's contribution to the injury or damage. There are two variants " +
@@ -85,6 +112,7 @@ var (
 		name:      "pure comparative negligence",
 		shortName: "purecompneg1",
 		level:     1,
+		related:   []*Concept{ComparativeNegligence1, ModifiedComparativeNegligence1, ContributoryNegligence1},
 		explanation: &Explanation{Text: []string{
 			"In pure comparative negligence there is no threshold for barring the plaintiff for recovering " +
 				"part of the damages, even though she is responsible for some (or a large) part of the " +
@@ -100,6 +128,7 @@ var (
 		name:      "contributory negligence",
 		shortName: "contribneg1",
 		level:     1,
+		related:   []*Concept{ComparativeNegligence1, ModifiedComparativeNegligence1, PureComparativeNegligence1},
 	}).add()
 	PreponderanceOfTheElements1 = (&Concept{
 		name:      "preponderance of the elements",
@@ -212,27 +241,14 @@ var (
 )
 
 func initConcepts() {
-	// Links all the contributory and comparative negligence concepts to
-	// one another.
-	ComparativeNegligence1.related = []*Concept{
-		ModifiedComparativeNegligence1,
-		PureComparativeNegligence1,
-		ContributoryNegligence1,
-	}
-	PureComparativeNegligence1.related = []*Concept{
-		ComparativeNegligence1,
-		ModifiedComparativeNegligence1,
-		ContributoryNegligence1,
-	}
-	ModifiedComparativeNegligence1.related = []*Concept{
-		ComparativeNegligence1,
-		PureComparativeNegligence1,
-		ContributoryNegligence1,
-	}
-	ContributoryNegligence1.related = []*Concept{
-		ComparativeNegligence1,
-		ModifiedComparativeNegligence1,
-		PureComparativeNegligence1,
+	m := make(map[string]interface{})
+
+	for _, c := range allConcepts {
+		name := c.shortName
+		if _, ok := m[name]; ok {
+			panic(fmt.Sprintf("Duplicate concept short name: %s", name))
+		}
+		m[name] = nil
 	}
 
 	for _, c := range allConcepts {
@@ -255,16 +271,4 @@ func conceptMapToSlice(m map[*Concept]interface{}) []*Concept {
 	})
 
 	return keys
-}
-
-func checkConcepts() {
-	m := make(map[string]interface{})
-
-	for _, c := range allConcepts {
-		name := c.shortName
-		if _, ok := m[name]; ok {
-			panic(fmt.Sprintf("Duplicate concept short name: %s", name))
-		}
-		m[name] = nil
-	}
 }
