@@ -38,14 +38,14 @@ var (
 		level:     1,
 	}).add()
 	CauseInFact1 = (&Concept{
-		name: "cause in fact (basic)",
+		name:      "cause in fact (basic)",
 		shortName: "causeinfact1",
-		level: 1,
+		level:     1,
 		explanation: &Explanation{
-			Text:       []string{
+			Text: []string{
 				"Cause-in-fact causation requires a plaintiff to show that he or she would not have been " +
 					"injured but for the defendant's actions. The essential question in determining the " +
-					"cause-in-fact is whether the plaintiff's injuries would have resulted regardless of "+
+					"cause-in-fact is whether the plaintiff's injuries would have resulted regardless of " +
 					"the defendant's negligence.",
 			},
 		},
@@ -130,22 +130,22 @@ var (
 		},
 	}).add()
 	ResIpsaLoquitur1 = (&Concept{
-			name:      "res ipsa loquitur (basic)",
-			shortName: "resipsa1",
-			level:     1,
-			explanation: &Explanation{
-				Text: []string{
-					"Res ipsa Loquitur: The thing speaks for itself.",
-					"The doctrine of res ipsa loquitur can be called in when, even though it is not exactly " +
-						"known what happened it is obvious that something negligent happened. The doctrinal " +
-						"example is a sack of flour falling from above and landing on someone's head.",
-				},
+		name:      "res ipsa loquitur (basic)",
+		shortName: "resipsa1",
+		level:     1,
+		explanation: &Explanation{
+			Text: []string{
+				"Res ipsa Loquitur: The thing speaks for itself.",
+				"The doctrine of res ipsa loquitur can be called in when, even though it is not exactly " +
+					"known what happened it is obvious that something negligent happened. The doctrinal " +
+					"example is a sack of flour falling from above and landing on someone's head.",
 			},
-		}).add()
+		},
+	}).add()
 	VicariousLiability1 = (&Concept{
-		name:        "vicarious liability",
-		shortName:   "vicliab1",
-		level:       1,
+		name:      "vicarious liability",
+		shortName: "vicliab1",
+		level:     1,
 		explanation: &Explanation{
 			Text: []string{
 				"Vicarious liability is a legal doctrine whereby a person who is not personally at fault is " +
@@ -154,42 +154,58 @@ var (
 		},
 	}).add()
 	PunitiveDamages1 = (&Concept{
-		name: "punitive damages",
+		name:      "punitive damages",
 		shortName: "pundam1",
-		level: 1,
+		level:     1,
 		explanation: &Explanation{
 			Text: []string{
-				"Punitive damages (as opposed to compensatory damages) are designed to prevent others from "+
+				"Punitive damages (as opposed to compensatory damages) are designed to prevent others from " +
 					"being hurt by the same or similar actions.",
 			},
 		},
 	}).add()
 	EconomicDamages1 = (&Concept{
-		name:        "economic damages",
-		shortName:   "ecodam1",
-		level:       1,
+		name:      "economic damages",
+		shortName: "ecodam1",
+		level:     1,
 		explanation: &Explanation{
-			Text:[]string{
+			Text: []string{
 				"Economic damages are compensation you receive as a result of monetary losses you suffer " +
 					"because of an accident.",
 			},
 		},
 	}).add()
 	CollateralSourcePayments1 = (&Concept{
-		name:        "collateral source payments",
-		shortName:   "collsrcpay1",
-		level:       1,
+		name:      "collateral source payments",
+		shortName: "collsrcpay1",
+		level:     1,
 		explanation: &Explanation{
-			Text:[]string{
-				"Collateral source payments are payments a plaintiff might receive from for instance an "+
+			Text: []string{
+				"Collateral source payments are payments a plaintiff might receive from for instance an " +
 					"insurance company for part or all of the damages. The Collateral Source Rule states " +
-					"that no evidence of collateral source payments may be introduced to the jury. Because "+
-					"of this these payments do not reduce the liability for the tortfeasor. Many states have "+
+					"that no evidence of collateral source payments may be introduced to the jury. Because " +
+					"of this these payments do not reduce the liability for the tortfeasor. Many states have " +
 					"abrogated this rule by statute.",
 			},
 			References: []Reference{
 				&Restatement{"920A"},
 				&URL{"https://www.claimsjournal.com/news/national/2018/01/11/282417.htm"},
+			},
+		},
+	}).add()
+	primaFacie2 = (&Concept{
+		name:      "prima facie case",
+		shortName: "primafacie",
+		level:     2,
+		explanation: &Explanation{
+			Text: []string{
+				"We say there is a prima facie case to answer if the case contains all of the following four" +
+					"elements:",
+				"1) The plaintiff suffered property damage or a bodily injury.",
+				"2) The defendant has a legal duty owed to the plaintiff that sees to preventing " +
+					"the kind of injury/damage that the plaintiff suffered.",
+				"3) The defendant breached that duty.",
+				"4) Proof that the defendant's breach caused the injury.",
 			},
 		},
 	}).add()

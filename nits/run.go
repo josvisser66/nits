@@ -85,6 +85,7 @@ func Run(content *Content) {
 	}
 
 	ui.newline()
+	DefaultCase().ask(ui, state)
 
 	for {
 		if next := state.selectQuestion(); next != nil {

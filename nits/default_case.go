@@ -16,6 +16,11 @@ func DefaultCase() *Case {
 		OwedFrom:    []*Person{demi},
 		OwedTo:      []*Person{ashton},
 	}
+	leaveCarsSafely := &Duty {
+		Description: "Cars should not be left in the middle of the road.",
+		OwedFrom:    []*Person{ashton},
+		OwedTo:      []*Person{bruce, rooke,demi},
+	}
 
 	rookesInjury := &BodilyInjury{
 		Description: "Rooke suffers serious injuries because of being thrown from the car",
@@ -83,6 +88,7 @@ func DefaultCase() *Case {
 	ashtonFleesTheCar := &Act{
 		Person:       ashton,
 		Description:  "Ashton abandons the car",
+		Duty: leaveCarsSafely,
 		Consequences: []Event{brucesCarPlowsIntoAshtonsCar},
 	}
 	carDies := &PassiveEvent{
