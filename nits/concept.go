@@ -36,7 +36,6 @@ var (
 		name:      "defendant",
 		shortName: "defendant0",
 		level:     0,
-		related:   []*Concept{Plaintiff0},
 		explanation: &Explanation{
 			Text: []string{
 				"Defendants are the people that are being sued. Typically these are the people " +
@@ -79,7 +78,6 @@ var (
 		name:      "comparative negligence",
 		shortName: "compneg1",
 		level:     1,
-		related:   []*Concept{ModifiedComparativeNegligence1, PureComparativeNegligence1, ContributoryNegligence1},
 		hints: []string{
 			"Is the plaintiff negligent themselves?",
 		},
@@ -97,7 +95,6 @@ var (
 		name:      "modified comparative negligence",
 		shortName: "modcompneg1",
 		level:     1,
-		related:   []*Concept{ComparativeNegligence1, PureComparativeNegligence1, ContributoryNegligence1},
 		explanation: &Explanation{Text: []string{
 			"The doctrine of modified comparative negligence is a form of comparative negligence where there is " +
 				"a threshold for the plaintiff's contribution to the injury or damage. There are two variants " +
@@ -112,7 +109,6 @@ var (
 		name:      "pure comparative negligence",
 		shortName: "purecompneg1",
 		level:     1,
-		related:   []*Concept{ComparativeNegligence1, ModifiedComparativeNegligence1, ContributoryNegligence1},
 		explanation: &Explanation{Text: []string{
 			"In pure comparative negligence there is no threshold for barring the plaintiff for recovering " +
 				"part of the damages, even though she is responsible for some (or a large) part of the " +
@@ -241,6 +237,24 @@ var (
 )
 
 func initConcepts() {
+	// These are here to break type checking loops.
+	Defendant0.related = []*Concept{Plaintiff0}
+	ComparativeNegligence1.related = []*Concept{
+		ModifiedComparativeNegligence1,
+		PureComparativeNegligence1,
+		ContributoryNegligence1,
+	}
+	ModifiedComparativeNegligence1.related = []*Concept{
+		ComparativeNegligence1,
+		PureComparativeNegligence1,
+		ContributoryNegligence1,
+	}
+	PureComparativeNegligence1.related = []*Concept{
+		ComparativeNegligence1,
+		ModifiedComparativeNegligence1,
+		ContributoryNegligence1,
+	}
+
 	m := make(map[string]interface{})
 
 	for _, c := range allConcepts {

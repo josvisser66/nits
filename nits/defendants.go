@@ -13,7 +13,7 @@ func (p *defendantsSubQuestion) getTag() string {
 }
 
 func (p *defendantsSubQuestion) getConcepts() []*Concept {
-	return []*Concept{defendants1}
+	return []*Concept{Defendant0}
 }
 
 var _ = addSubQuestion(&defendantsSubQuestion{})
