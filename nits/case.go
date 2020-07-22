@@ -93,6 +93,8 @@ func pushSubQuestionCommandContext(ui *userInterface, displaySubQuestion func([]
 func (c *Case) selectSubQuestion(state *studentState, done map[subQuestion]int) subQuestion {
 	//REMOVEME
 	return &negligencePerSeSubQuestion{}
+	// Let's check what the new scores are...
+	state.train()
 
 	possibles := make([]subQuestion, 0)
 
