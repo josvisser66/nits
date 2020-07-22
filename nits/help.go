@@ -1,5 +1,8 @@
 package nits
 
+// This file implements NIT's extremely rudimentary system for context
+// sensitive help.
+
 import "fmt"
 
 // --------------------------------------------------------------------
@@ -37,6 +40,3 @@ func (u *URL) GetReferenceText() string {
 	return u.Url
 }
 
-type helpContext struct {
-	help *Help
-}

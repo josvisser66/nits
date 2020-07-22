@@ -1,7 +1,12 @@
 package nits
 
+// This file contains the preprocessing code for a case.
+
 import "math/rand"
 
+// preprocessedCase is a struct that contains sets for all the individual
+// objects of a given type in a case.
+// In the act of creating this struct we also fill back links in the objects.
 type preprocessedCase struct {
 	events                 map[Event]interface{}
 	persons                map[*Person]interface{}
@@ -88,7 +93,10 @@ func (p *preprocessedCase) ppEvents(parent Event, events []Event) {
 	}
 }
 
-func preprocess(c *Case) *preprocessedCase {
+// preprocess preprocesses a case. It starts at the root events of the
+// case and collects all the individual objects into sets of their type.
+// Along the way the back links in various objects are also filled in.
+func (c *Case) preprocess() *preprocessedCase {
 	if c.preproc != nil {
 		return c.preproc
 	}
@@ -105,6 +113,7 @@ func preprocess(c *Case) *preprocessedCase {
 	return p
 }
 
+// findEvent finds an event by short name. Used for unit testing.
 func (p *preprocessedCase) findEvent(shortName string) Event {
 	for event := range p.events {
 		if event.getShortName() == shortName {
@@ -114,6 +123,7 @@ func (p *preprocessedCase) findEvent(shortName string) Event {
 	return nil
 }
 
+// randomAct finds a random act.
 func (p *preprocessedCase) randomAct() *Act {
 	acts := make([]*Act, 0, len(p.events))
 	for event := range p.events {
@@ -125,6 +135,7 @@ func (p *preprocessedCase) randomAct() *Act {
 	return acts[rand.Int()%len(acts)]
 }
 
+// randomInjuryOrDamage finds a random injury or damage. Surprising, I know.
 func (p *preprocessedCase) randomInjuryOrDamage() InjuryOrDamage {
 	dams := make([]InjuryOrDamage, 0, len(p.injuriesOrDamages))
 	for dam := range p.injuriesOrDamages {

@@ -3,6 +3,7 @@ package content
 import "C"
 import . "../nits"
 
+// A simple case courtesy of https://www.lawnerds.com/testyourself/torts_exam.html
 func case2() *Case {
 	david := &Person{Name: "David"}
 	peter := &Person{Name: "Peter"}
@@ -122,6 +123,9 @@ func case2() *Case {
 	}
 }
 
+// GetContent returns the content that NITS operates on.
+// This is test content containing a few multiple choice / proposition
+// questions and two cases.
 func GetContent() *Content {
 	return &Content{
 		Questions: []Question{

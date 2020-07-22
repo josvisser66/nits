@@ -1,8 +1,11 @@
 package nits
 
+// This file contains the core data model of NITS.
+
 // --------------------------------------------------------------------
+// Person is a person that is involved in a case.
 type Person struct {
-	Name string
+	Name    string
 	damages map[InjuryOrDamage]interface{}
 }
 
@@ -11,12 +14,14 @@ func (p *Person) getLabel() string {
 }
 
 // --------------------------------------------------------------------
+// BrokenLegalRequirement is the fact that one or more persons are in
+// violation of a statute ir regulation (negligence per se).
 type BrokenLegalRequirement struct {
 	Description  string
 	Persons      []*Person
 	Consequences []Event
 	Explanation  *Explanation
-	event        Event
+	event        Event // Back link to event that points to this BrokenLegalRequirement.
 }
 
 func (b *BrokenLegalRequirement) getLabel() string {
@@ -24,11 +29,12 @@ func (b *BrokenLegalRequirement) getLabel() string {
 }
 
 // --------------------------------------------------------------------
+// Duty is a legal obligation.
 type Duty struct {
 	Description string
 	OwedFrom    []*Person
 	OwedTo      []*Person
-	event       Event
+	event       Event // Back link to the event that points to this Duty.
 }
 
 func (d *Duty) getLabel() string {
@@ -36,11 +42,12 @@ func (d *Duty) getLabel() string {
 }
 
 // --------------------------------------------------------------------
+// Claim is an (irrelevant) claim that a person is making for an event.
 type Claim struct {
 	Person      *Person
 	Description string
 	Explanation *Explanation
-	event       Event
+	event       Event // Back link to the event that points to this Claim.
 }
 
 func (c *Claim) getLabel() string {
@@ -48,6 +55,7 @@ func (c *Claim) getLabel() string {
 }
 
 // --------------------------------------------------------------------
+// Event is something that happened.
 type Event interface {
 	getLabel() string // For dot drawings.
 	getShortName() string
@@ -61,21 +69,23 @@ type Event interface {
 	addCause(e Event)
 }
 
+// PassiveEvent is an event that just happens, it is not an Act.
 type PassiveEvent struct {
-	shortName         string
+	shortName         string // for internal (testing) use only.
 	Description       string
 	Consequences      []Event
 	Duty              *Duty
 	NegPerSe          *BrokenLegalRequirement
 	InjuriesOrDamages []InjuryOrDamage
 	Claims            []*Claim
-	directCauses      []Event
+	directCauses      []Event // Back links to the events that this event is a consequence of.
 }
 
 func (pe *PassiveEvent) getLabel() string {
 	return pe.Description
 }
 
+// addCause adds an event that is the cause of this event.
 func (pe *PassiveEvent) addCause(event Event) {
 	if event == nil {
 		return
@@ -119,8 +129,9 @@ func (pe *PassiveEvent) getDirectCauses() []Event {
 }
 
 // --------------------------------------------------------------------
+// Act is an event that was a willful act by a person.
 type Act struct {
-	shortName         string
+	shortName         string // Internal use (testing) only.
 	Person            *Person
 	Description       string
 	Consequences      []Event
@@ -128,7 +139,7 @@ type Act struct {
 	NegPerSe          *BrokenLegalRequirement
 	InjuriesOrDamages []InjuryOrDamage
 	Claims            []*Claim
-	directCauses      []Event
+	directCauses      []Event // Back links to the events that inspired this act.
 }
 
 func (a *Act) getLabel() string {
@@ -178,12 +189,7 @@ func (a *Act) getDirectCauses() []Event {
 }
 
 // --------------------------------------------------------------------
-// Deprecated?
-type Cause interface {
-	GetCauseDescription() string
-}
-
-// --------------------------------------------------------------------
+// InjuryOrDamage; speaks for itself :-)
 type InjuryOrDamage interface {
 	GetDescription() string
 	GetPersons() []*Person
@@ -192,10 +198,11 @@ type InjuryOrDamage interface {
 	addCause(event Event)
 }
 
+// BodilyInjury is a bodily injury suffered by one or more persons.
 type BodilyInjury struct {
 	Description  string
 	Persons      []*Person
-	directCauses []Event
+	directCauses []Event // Back links to the events that directly caused this injury.
 }
 
 func (b *BodilyInjury) GetDescription() string {
@@ -221,19 +228,11 @@ func (b *BodilyInjury) getDirectCauses() []Event {
 	return b.directCauses
 }
 
-type EmotionalHarm struct {
-	Description string
-	Persons     []*Person
-}
-
-func (e *EmotionalHarm) GetInjuryDescription() string {
-	return e.Description
-}
-
+// PropertyDamage is damage to somebody's property.
 type PropertyDamage struct {
 	Description  string
 	Persons      []*Person
-	directCauses []Event
+	directCauses []Event // Back links to the events that directly caused this damage.
 }
 
 func (p *PropertyDamage) GetDescription() string {
@@ -260,10 +259,13 @@ func (p *PropertyDamage) getDirectCauses() []Event {
 }
 
 // --------------------------------------------------------------------
+
+// Content is the question content that NITS operates on.
 type Content struct {
 	Questions []Question
 }
 
+// findQuestion finds a question by short name.
 func (c *Content) findQuestion(shortName string) Question {
 	for _, q := range c.Questions {
 		if q.getShortName() == shortName {

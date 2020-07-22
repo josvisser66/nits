@@ -1,4 +1,7 @@
+// Package nits contains the implementation of NITS, an ITS for negligence.
 package nits
+
+// This file contains the outermost function of NITS.
 
 import (
 	"fmt"
@@ -8,6 +11,7 @@ import (
 	"time"
 )
 
+// Run runs NITS on some content.
 func Run(content *Content) {
 	content.check()
 
@@ -28,14 +32,15 @@ func Run(content *Content) {
 	ui := newUserInterface()
 	defer ui.rl.Close()
 
+	// Pushes the outermost command context.
 	ui.pushCommandContext(&CommandContext{
-		Description: "NITS core commands",
-		Commands: []*Command{
+		description: "NITS core commands",
+		commands: []*Command{
 			{
-				Aliases: []string{"exit", "quit"},
-				Global:  true,
-				Help:    "Exits NITS.",
-				Executor: func(line []string) bool {
+				aliases: []string{"exit", "quit"},
+				global:  true,
+				help:    "Exits NITS.",
+				executor: func(line []string) bool {
 					if sure, _ := ui.yesNo("Are you sure you want to quit"); sure {
 						state.saveUserData()
 						os.Exit(0)
@@ -44,19 +49,19 @@ func Run(content *Content) {
 				},
 			},
 			{
-				Aliases: []string{"debug"},
-				Global:  true,
-				Help:    "NITS debugging (internal)",
-				Executor: func(words []string) bool {
+				aliases: []string{"debug"},
+				global:  true,
+				help:    "NITS debugging (internal)",
+				executor: func(words []string) bool {
 					debug(ui, state, words)
 					return false
 				},
 			},
 			{
-				Aliases: []string{"load"},
-				Global:  true,
-				Help:    "Load user data",
-				Executor: func([]string) bool {
+				aliases: []string{"load"},
+				global:  true,
+				help:    "Load student data",
+				executor: func([]string) bool {
 					if err := state.loadUserData(); err != nil {
 						ui.error("Loading failed: %s", err)
 					}
@@ -64,10 +69,10 @@ func Run(content *Content) {
 				},
 			},
 			{
-				Aliases: []string{"save"},
-				Global:  true,
-				Help:    "Save user data",
-				Executor: func([]string) bool {
+				aliases: []string{"save"},
+				global:  true,
+				help:    "Save student data",
+				executor: func([]string) bool {
 					if err := state.saveUserData(); err != nil {
 						ui.error("Saving failed: %s", err)
 					}
@@ -85,8 +90,6 @@ func Run(content *Content) {
 	}
 
 	ui.newline()
-	// REMOVEME
-	content.findQuestion("case_teleco").ask(ui, state)
 
 	for {
 		if next := state.selectQuestion(); next != nil {
@@ -100,6 +103,8 @@ func Run(content *Content) {
 	state.saveUserData()
 }
 
+// check checks the content. Mostly delegates to the check methods
+// of each of the questions.
 func (c *Content) check() {
 	m := make(map[string]interface{})
 
@@ -113,6 +118,7 @@ func (c *Content) check() {
 	}
 }
 
+// Helper functions. Go people don't like this CHECK function, but I do.
 func CHECK(b bool, s string, args ...interface{}) {
 	if !b {
 		panic(fmt.Sprintf(s, args...))

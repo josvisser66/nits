@@ -1,5 +1,8 @@
 package nits
 
+// This file contains the implementation of the causality in fact
+// sub question.
+
 type causeInFactSubQuestion struct{}
 
 func (cif *causeInFactSubQuestion) getTag() string {
@@ -12,12 +15,17 @@ func (cif *causeInFactSubQuestion) getConcepts() []*Concept {
 
 var _ = addSubQuestion(&causeInFactSubQuestion{})
 
+// ask asks the sub question
 func (cif *causeInFactSubQuestion) ask(c *Case, ui *userInterface, state *studentState) bool {
-	dam := c.preproc.randomInjuryOrDamage()
-	act := c.preproc.randomAct()
+	// Finds a random piece of damage and a random act in the case and then
+	// figures out if they are connected by a link of causality.
+  pp := c.preprocess()
+	dam := pp.randomInjuryOrDamage()
+	act := pp.randomAct()
 	rightAnswer := isCauseInFact(dam, act)
 
 	displayQuestion := func([]string) bool {
+		ui.newline()
 		ui.println("In this case, is the act:")
 		ui.println(act.Description)
 		ui.println("a cause-in-fact of this injury or property damage:")
@@ -27,7 +35,7 @@ func (cif *causeInFactSubQuestion) ask(c *Case, ui *userInterface, state *studen
 	}
 
 	displayQuestion(nil)
-	pushSubQuestionCommandContext(state, ui, displayQuestion)
+	pushSubQuestionCommandContext(ui, displayQuestion)
 	defer ui.popCommandContext()
 
 	attempts := 0

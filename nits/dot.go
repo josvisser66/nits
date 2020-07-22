@@ -1,5 +1,9 @@
 package nits
 
+// This file implements the function to generate GraphViz dot files for
+// all the questions or for an individual case. Lots of datamodel wrangling
+// to output the dot file.
+
 import (
 	"errors"
 	"fmt"
@@ -17,6 +21,9 @@ const (
 	shapeNegPerSe       = "parallelogram"
 )
 
+// makeDot creates a dot file for all questions and concepts.
+// If withSkills == true then the concepts will contain the skill scores.
+// It returns the name  of the temporary file that contains the dot graph.
 func makeDot(state *studentState, withSkills bool) (string, error) {
 	f, err := ioutil.TempFile("", "nits*.dot")
 	if err != nil {
@@ -52,7 +59,8 @@ func makeDot(state *studentState, withSkills bool) (string, error) {
 	return f.Name(), err
 }
 
-// --------------------------------------------------------------------
+// makeCaseDot generates a dot file for a case with all the objects linked.
+// Lots of wrangling.
 func makeCaseDot(state *studentState, words []string) (string, error) {
 	if len(words) < 2 {
 		return "", errors.New("please provide the short name of a case as an argument")
@@ -65,7 +73,7 @@ func makeCaseDot(state *studentState, words []string) (string, error) {
 	if !ok {
 		return "", errors.New("that question is not a case")
 	}
-	pp := preprocess(c)
+	pp := c.preprocess()
 	f, err := ioutil.TempFile("", "nits*.dot")
 	if err != nil {
 		return "", err
@@ -96,10 +104,13 @@ func makeCaseDot(state *studentState, words []string) (string, error) {
 	return f.Name(), err
 }
 
+// hasLabel is an interface for something that has a label. Every object that
+// needs to be drawn needs to have one.
 type hasLabel interface {
 	getLabel() string
 }
 
+// draw generates a dot shape for an object.
 func draw(f *os.File, t string, shape string, obj hasLabel) error {
 	_, err := f.WriteString(fmt.Sprintf("  %s_%p [shape=%s,label=\"%s\"];\n", t, obj, shape, obj.getLabel()))
 	return err

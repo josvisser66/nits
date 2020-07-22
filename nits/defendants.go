@@ -1,5 +1,9 @@
 package nits
 
+// This file implements the defendants sub question. This sub question type
+// asks who could be the defendants of litigation for a particular injury
+// or damage.
+
 import (
 	"math/rand"
 	"sort"
@@ -18,20 +22,28 @@ func (p *defendantsSubQuestion) getConcepts() []*Concept {
 
 var _ = addSubQuestion(&defendantsSubQuestion{})
 
-
+// Asks the defendants sub question.
 func (p *defendantsSubQuestion) ask(c *Case, ui *userInterface, state *studentState) bool {
-	dams := make([]InjuryOrDamage, 0, len(c.preproc.injuriesOrDamages))
-	for dam, _ := range c.preproc.injuriesOrDamages {
+	// Collects all the damages in a case into a slice and randomly shuffles
+	// them.
+  pp := c.preprocess()
+	dams := make([]InjuryOrDamage, 0, len(pp.injuriesOrDamages))
+	for dam, _ := range pp.injuriesOrDamages {
 		dams = append(dams, dam)
 	}
 	rand.Shuffle(len(dams), func(i,j int) {
 		dams[i], dams[j] = dams[j], dams[i]
 	})
+	// For all the damages, find if there where breached duties in the
+	// causality chain.
 	for _, dam := range dams {
-		duties := findDuties(dam, dam.getDirectCauses())
+		duties := findDuties(dam)
+		// If there are none, try the next damage.
 		if len(duties) == 0 {
 			continue
 		}
+		// We have found one or more breached duties that led to this damage.
+		// Ask the student the names of all the people who had this duty.
 		attempts := 0
 		for {
 			ui.newline()
@@ -73,10 +85,18 @@ func (p *defendantsSubQuestion) ask(c *Case, ui *userInterface, state *studentSt
 				continue
 			}
 
+			// Compares the answer of the student with all the persons
+			// collected from the breached duties that led to this
+			// damage.
+
+			// names is the list entered by the student. Sort this list
+			// by name.
 			sort.Slice(names, func(i, j int) bool {
 				return names[i] < names[j]
 			})
 
+			// Collect the persons from the duties, put their names
+			// (lower case) in a slice, and sort that slice by name.
 			names2 := make([]string, 0)
 			for p, _ := range collectPersonsFromDuties(duties) {
 				names2 = append(names2, strings.ToLower(p.Name))
@@ -86,6 +106,7 @@ func (p *defendantsSubQuestion) ask(c *Case, ui *userInterface, state *studentSt
 				return names2[i] < names2[j]
 			})
 
+			// Now compare the two slices.
 			if func() bool {
 				if len(names) != len(names2) {
 					return false

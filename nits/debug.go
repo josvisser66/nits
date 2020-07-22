@@ -1,13 +1,16 @@
 package nits
 
+// This file contains the NITS debugger. It implements UI commands that
+// can be used to get an insight into the internals of NITS.
+
 import (
 	"fmt"
 	"os/exec"
 )
 
-var (
-	trace *tracer
-)
+// A global tracer. When non-nil this can be used to get some debugging
+// output during the operation of NITS (inconsistently implemented).
+var trace *tracer
 
 type tracer struct {
 	ui *userInterface
@@ -27,6 +30,8 @@ func (t *tracer) println(s string, args ...interface{}) {
 	t.ui.println(s, args...)
 }
 
+// displayAnswers is a UI command that displays all registered answers in the
+// student state.
 func displayAnswers(ui *userInterface, state *studentState) {
 	ui.println("Registered answers:")
 	ui.newline()
@@ -36,6 +41,7 @@ func displayAnswers(ui *userInterface, state *studentState) {
 	}
 }
 
+// displayQuestions is a UI command that displays all questions in the content.
 func displayQuestions(ui *userInterface, state *studentState) {
 	ui.println("All questions:")
 	ui.newline()
@@ -49,22 +55,29 @@ func displayQuestions(ui *userInterface, state *studentState) {
 	}
 }
 
+// runShell is a helper that executes a shell command.
 func runShell(shellCommand string) error {
 	cmd := exec.Command("/bin/bash", "-c", shellCommand)
 	_, err := cmd.Output()
 	return err
 }
 
+// showDot is a helper that runs the GraphViz dot command. When run on a Mac
+// it will actually show the generated file in Preview.
 func showDot(ui *userInterface, fname string) error {
 	ui.println("Dot file: %s", fname)
-	if err := runShell(fmt.Sprintf("dot -Tpdf %s >/tmp/aap.pdf && open /tmp/aap.pdf", fname)); err != nil {
+	if err := runShell(fmt.Sprintf("dot -Tpdf %s >/tmp/nitsdot.pdf && test `uname` = Darwin && open /tmp/nitsdot.pdf", fname)); err != nil {
 		return err
 	}
 	return nil
 }
 
+// nextQuetion is a UI commmand that allows the user to manually set the next
+// question to ask.
 func nextQuestion(ui *userInterface, state *studentState, words []string) {
+	// No argument specified? Reset the next question field.
 	if len(words) <2 {
+		ui.println("Next question reset to nil.")
 		state.nextQuestion = nil
 	} else if q := state.content.findQuestion(words[1]); q == nil {
 		ui.error("Question not found.")
@@ -73,45 +86,46 @@ func nextQuestion(ui *userInterface, state *studentState, words []string) {
 	}
 }
 
+// debug is the NITS debugger UI command.
 func debug(ui *userInterface, state *studentState, words []string) bool {
 	ui.pushCommandContext(&CommandContext{
-		Description: "NITS debugger",
-		Commands: []*Command{
+		description: "NITS debugger",
+		commands: []*Command{
 			{
-				Aliases: []string{"questions"},
-				Help:    "Displays all known questions.",
-				Executor: func([]string) bool {
+				aliases: []string{"questions"},
+				help:    "Displays all known questions.",
+				executor: func([]string) bool {
 					displayQuestions(ui, state)
 					return false
 				},
 			},
 			{
-				Aliases: []string{"next"},
-				Help:    "Selects the next question (by short name).",
-				Executor: func(words []string) bool {
+				aliases: []string{"next"},
+				help:    "Selects the next question (by short name).",
+				executor: func(words []string) bool {
 					nextQuestion(ui, state, words)
 					return false
 				},
 			},
 			{
-				Aliases: []string{"answers"},
-				Help:    "Displays all registered answers.",
-				Executor: func([]string) bool {
+				aliases: []string{"answers"},
+				help:    "Displays all registered answers.",
+				executor: func([]string) bool {
 					displayAnswers(ui, state)
 					return false
 				},
 			},
 			{
-				Aliases: []string{"done"},
-				Help:    "Exits the debugger.",
-				Executor: func([]string) bool {
+				aliases: []string{"done"},
+				help:    "Exits the debugger.",
+				executor: func([]string) bool {
 					return true
 				},
 			},
 			{
-				Aliases: []string{"train"},
-				Help:    "Runs trainhmm.",
-				Executor: func([]string) bool {
+				aliases: []string{"train"},
+				help:    "Runs trainhmm.",
+				executor: func([]string) bool {
 					if len(state.answers) == 0 {
 						ui.println("Nothing to train.")
 						return false
@@ -132,9 +146,9 @@ func debug(ui *userInterface, state *studentState, words []string) bool {
 				},
 			},
 			{
-				Aliases: []string{"scores"},
-				Help:    "Shows all concepts and the student's skill levels.",
-				Executor: func([]string) bool {
+				aliases: []string{"scores"},
+				help:    "Shows all concepts and the student's skill levels.",
+				executor: func([]string) bool {
 					if len(state.scores) == 0 {
 						ui.println("This student is from Barcelona.")
 						return false
@@ -146,9 +160,9 @@ func debug(ui *userInterface, state *studentState, words []string) bool {
 				},
 			},
 			{
-				Aliases: []string{"dot"},
-				Help:    "Generates dot file for content and concepts.",
-				Executor: func([]string) bool {
+				aliases: []string{"dot"},
+				help:    "Generates dot file for content and concepts.",
+				executor: func([]string) bool {
 					annotate, ret := ui.yesNo("Augment concepts with skill level ratios")
 					if ret {
 						return ret
@@ -165,9 +179,9 @@ func debug(ui *userInterface, state *studentState, words []string) bool {
 				},
 			},
 			{
-				Aliases: []string{"casedot"},
-				Help:    "Generates dot file for a case.",
-				Executor: func(words []string) bool {
+				aliases: []string{"casedot"},
+				help:    "Generates dot file for a case.",
+				executor: func(words []string) bool {
 					fname, err := makeCaseDot(state, words)
 					if err != nil {
 						ui.error("error: %s", err)
@@ -180,9 +194,9 @@ func debug(ui *userInterface, state *studentState, words []string) bool {
 				},
 			},
 			{
-				Aliases: []string{"trace"},
-				Help:    "Switching detail tracing on or off",
-				Executor: func(words []string) bool {
+				aliases: []string{"trace"},
+				help:    "Switching detail tracing on or off",
+				executor: func(words []string) bool {
 					state := "on"
 					if len(words) == 1 {
 						if trace == nil {
@@ -202,9 +216,9 @@ func debug(ui *userInterface, state *studentState, words []string) bool {
 				},
 			},
 			{
-				Aliases: []string{"select"},
-				Help:    "Run the question selection algorithm",
-				Executor: func([]string) bool {
+				aliases: []string{"select"},
+				help:    "Run the question selection algorithm",
+				executor: func([]string) bool {
 					q := state.selectQuestion()
 					if q == nil {
 						ui.error("No question selected!")
@@ -218,6 +232,9 @@ func debug(ui *userInterface, state *studentState, words []string) bool {
 	defer ui.popPrompt()
 	defer ui.popCommandContext()
 
+	// Was a debugging command given on the debug command itself?
+	// E.g: debug train.
+	// If so, execute it.
 	if len(words) > 1 {
 		var ret, didExec bool
 		if didExec, ret = ui.maybeExecuteCommand(words[1:]); !didExec {

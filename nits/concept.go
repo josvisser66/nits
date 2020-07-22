@@ -1,5 +1,7 @@
 package nits
 
+// This file creates all the concepts in NITS (as global variables).
+
 import (
 	"fmt"
 	"sort"
@@ -15,22 +17,30 @@ type Concept struct {
 	hints       []string
 }
 
+// A global list of all concepts in the system.
 var allConcepts = make([]*Concept, 0)
 
+// add adds a concept to the global list.
 func (c *Concept) add() *Concept {
 	allConcepts = append(allConcepts, c)
 	return c
 }
+
+// sortRelatedConcepts sorts all related concepts of concept alphabetically
+// on name.
 func (c *Concept) sortRelatedConcepts() {
 	sort.Slice(c.related, func(i, j int) bool {
 		return c.related[i].name < c.related[j].name
 	})
 }
 
+// GetReferenceText gets a descriptive text for a concept. This allows a
+// concept to be used as reference.
 func (c *Concept) GetReferenceText() string {
 	return "Concept: " + c.name
 }
 
+// Declares all the global concepts.
 var (
 	Defendant0 = (&Concept{
 		name:      "defendant",
@@ -271,7 +281,10 @@ func initConcepts() {
 }
 
 // --------------------------------------------------------------------
-func conceptMapToSlice(m map[*Concept]interface{}) []*Concept {
+
+// conceptSetToSlice converts a set of concepts to a slice that is
+// sorted by name.
+func conceptSetToSlice(m map[*Concept]interface{}) []*Concept {
 	keys := make([]*Concept, len(m))
 	i := 0
 

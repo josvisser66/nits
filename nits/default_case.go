@@ -1,5 +1,8 @@
 package nits
 
+// This files contains a default case. It can be used in NITS content but is
+// also used for unit testing.
+
 func DefaultCase() *Case {
 	ashton := &Person{Name: "Ashton"}
 	demi := &Person{Name: "Demi"}

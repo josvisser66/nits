@@ -1,17 +1,20 @@
 package nits
 
+// This file contains the concept explorer.
+
 import (
 	"fmt"
 	"strconv"
 	"strings"
 )
 
-var active bool
-
+// ConceptBucket is a thing that has concepts.
 type ConceptBucket interface {
 	getConcepts() []*Concept
 }
 
+// findConcept finds a particular concept by name from a slice of concepts.
+// The match can be either on name or short name.
 func findConcept(concepts []*Concept, name string) *Concept {
 	for _, c := range concepts {
 		if c.name == name || c.shortName == name {
@@ -22,6 +25,7 @@ func findConcept(concepts []*Concept, name string) *Concept {
 	return nil
 }
 
+// explainConcept implements the explain command of the concept explorer.
 func (ui *userInterface) explainConcept(words []string, concepts []*Concept) {
 	name := strings.Join(words[1:], " ")
 	concept := findConcept(concepts, name)
@@ -34,16 +38,11 @@ func (ui *userInterface) explainConcept(words []string, concepts []*Concept) {
 	ui.explain(concept.explanation)
 }
 
-func ExploreConcepts(ui *userInterface, b ConceptBucket) {
-	if active {
-		return
-	}
-	active = true
-	defer func() { active = false }()
-
+// exploreConcepts is the concept explorer.
+func exploreConcepts(ui *userInterface, b ConceptBucket) {
 	concepts := b.getConcepts()
 
-	showConcepts := func([]string) bool {
+	printConceptList := func([]string) bool {
 		for i, c := range concepts {
 			ui.println("%d: %s", i+1, c.name)
 		}
@@ -53,25 +52,25 @@ func ExploreConcepts(ui *userInterface, b ConceptBucket) {
 	}
 
 	ui.pushCommandContext(&CommandContext{
-		Description: "Exploring a set of concepts",
-		Commands: []*Command{
+		description: "Exploring a set of concepts",
+		commands: []*Command{
 			{
-				Aliases:  []string{"show"},
-				Help:     "Shows all concepts we are exploring (again)",
-				Executor: showConcepts,
+				aliases:  []string{"show", "print", "display"},
+				help:     "Shows all concepts we are exploring (again).",
+				executor: printConceptList,
 			},
 			{
-				Aliases: []string{"explain"},
-				Help:    "Explains a concept.",
-				Executor: func(words []string) bool {
+				aliases: []string{"explain"},
+				help:    "Explains a concept by name.",
+				executor: func(words []string) bool {
 					ui.explainConcept(words, concepts)
 					return false
 				},
 			},
 			{
-				Aliases:  []string{"done"},
-				Help:     "Signals that you are done exploring concepts.",
-				Executor: func([]string) bool { return true },
+				aliases:  []string{"done"},
+				help:     "Signals that you are done exploring concepts.",
+				executor: func([]string) bool { return true },
 			},
 		},
 	})
@@ -83,7 +82,9 @@ func ExploreConcepts(ui *userInterface, b ConceptBucket) {
 	ui.println("Here are the concepts that play a role in this question:")
 	ui.newline()
 
-	showConcepts(nil)
+	printConceptList(nil)
+	// Creates an answerMap that allows selecting the concepts to be explained
+	// by number.
 	possibleAnswers := make(answerMap)
 
 	for i:=1; i<=len(concepts); i++ {
