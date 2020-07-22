@@ -12,31 +12,10 @@ func (cif *causeInFactSubQuestion) getConcepts() []*Concept {
 
 var _ = addSubQuestion(&causeInFactSubQuestion{})
 
-func isParentOf(suspectedParent, child Event) bool {
-	if suspectedParent == child {
-		return true
-	}
-	for _, cause := range child.getDirectCauses() {
-		if isParentOf(suspectedParent, cause) {
-			return true
-		}
-	}
-	return false
-}
-
-func (p *preprocessedCase) isCauseInFact(dam InjuryOrDamage, event Event) bool {
-	for _, e := range dam.getDirectCauses() {
-		if isParentOf(event, e) {
-			return true
-		}
-	}
-	return false
-}
-
 func (cif *causeInFactSubQuestion) ask(c *Case, ui *userInterface, state *studentState) bool {
 	dam := c.preproc.randomInjuryOrDamage()
 	act := c.preproc.randomAct()
-	rightAnswer := c.preproc.isCauseInFact(dam, act)
+	rightAnswer := isCauseInFact(dam, act)
 
 	displayQuestion := func([]string) bool {
 		ui.println("In this case, is the act:")

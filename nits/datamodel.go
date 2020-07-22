@@ -3,6 +3,7 @@ package nits
 // --------------------------------------------------------------------
 type Person struct {
 	Name string
+	damages map[InjuryOrDamage]interface{}
 }
 
 func (p *Person) getLabel() string {

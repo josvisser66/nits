@@ -18,52 +18,6 @@ func (p *defendantsSubQuestion) getConcepts() []*Concept {
 
 var _ = addSubQuestion(&defendantsSubQuestion{})
 
-func intersectPersons(a, b []*Person) []*Person {
-	m := make(map[*Person]int)
-
-	for _, p := range a {
-		m[p]++
-	}
-
-	for _, p := range b {
-		m[p]++
-	}
-
-	result := make([]*Person, 0)
-
-	for p, n := range m {
-		if n > 1 {
-			result = append(result, p)
-		}
-	}
-
-	return result
-}
-
-func findDuties(dam InjuryOrDamage, causes []Event) []*Duty {
-	seen := make(map[Event]interface{})
-	result := make([]*Duty, 0)
-	for len(causes) > 0 {
-		next := make([]Event, 0)
-		for _, e := range causes {
-			seen[e] = nil
-			for _, cause := range e.getDirectCauses() {
-				if _, ok := seen[cause]; !ok {
-					next = append(next, cause)
-				}
-			}
-			if e.getDuty() == nil {
-				continue
-			}
-			p := intersectPersons(dam.GetPersons(), e.getDuty().OwedTo)
-			if len(p) > 0 {
-				result = append(result, e.getDuty())
-			}
-		}
-		causes = next
-	}
-	return result
-}
 
 func (p *defendantsSubQuestion) ask(c *Case, ui *userInterface, state *studentState) bool {
 	dams := make([]InjuryOrDamage, 0, len(c.preproc.injuriesOrDamages))
@@ -123,15 +77,8 @@ func (p *defendantsSubQuestion) ask(c *Case, ui *userInterface, state *studentSt
 				return names[i] < names[j]
 			})
 
-			m := make(map[*Person]interface{})
-			for _, d := range duties {
-				for _, p := range d.OwedFrom {
-					m[p] = nil
-				}
-			}
-
 			names2 := make([]string, 0)
-			for p, _ := range m {
+			for p, _ := range collectPersonsFromDuties(duties) {
 				names2 = append(names2, strings.ToLower(p.Name))
 			}
 

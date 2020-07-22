@@ -1,9 +1,5 @@
 package nits
 
-import (
-	"math/rand"
-)
-
 // --------------------------------------------------------------------
 type Case struct {
 	Text []string
@@ -86,7 +82,9 @@ func (c *Case) selectSubQuestion(state *studentState, done map[subQuestion]int) 
 		return nil
 	}
 
-	return possibles[rand.Int() % len(possibles)]
+	//REMOVEME
+	return &negligencePerSeSubQuestion{}
+	//return possibles[rand.Int() % len(possibles)]
 }
 
 func (c *Case) ask(ui *userInterface, state *studentState) {

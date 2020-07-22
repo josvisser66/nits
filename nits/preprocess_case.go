@@ -33,6 +33,12 @@ func (p *preprocessedCase) ppInjuriesOrDamages(event Event, injuriesOrDamages []
 		p.ppPersons(dam.GetPersons())
 		dam.addCause(event)
 
+		for _, person := range dam.GetPersons() {
+			if person.damages == nil {
+				person.damages = make(map[InjuryOrDamage]interface{}, 0)
+			}
+			person.damages[dam] = nil
+		}
 	}
 }
 
@@ -40,6 +46,7 @@ func (p *preprocessedCase) ppBrokenLegalRequirement(event Event, negperse *Broke
 	negperse.event = event
 	p.ppEvents(nil, negperse.Consequences)
 	p.ppPersons(negperse.Persons)
+	p.brokenLegalRequirement[negperse] = nil
 }
 
 func (p *preprocessedCase) ppDuty(event Event, duty *Duty) {
