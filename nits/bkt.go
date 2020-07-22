@@ -26,7 +26,7 @@ const (
 	threshold = 0.95 // When do we consider a concept mastered?
 	pInit     = 0.1  // Probability that concept was known a-priory.
 	pLearn    = 0.2  // Probability that concept will transfer to mastered after a practice attempt.
-	pSlip     = 0.1  // Probability that a mastered skill is applied incorrectly.
+	pSlip     = 0.3  // Probability that a mastered skill is applied incorrectly.
 	pGuess    = 0.5  // Probability that an unmastered skill is applied incorrectly.
 )
 
