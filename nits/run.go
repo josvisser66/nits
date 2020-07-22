@@ -86,7 +86,7 @@ func Run(content *Content) {
 
 	ui.newline()
 	// REMOVEME
-	DefaultCase().ask(ui, state)
+	content.findQuestion("case_teleco").ask(ui, state)
 
 	for {
 		if next := state.selectQuestion(); next != nil {

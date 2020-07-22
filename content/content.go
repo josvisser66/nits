@@ -3,6 +3,125 @@ package content
 import "C"
 import . "../nits"
 
+func case2() *Case {
+	david := &Person{Name: "David"}
+	peter := &Person{Name: "Peter"}
+	teleco := &Person{Name: "Teleco"}
+	kevin := &Person{Name: "Kevin"}
+
+	buildSafePoles := &Duty{
+		Description: "Utilities building public infrastructure should do so safely",
+		OwedFrom:    []*Person{teleco},
+		OwedTo:      []*Person{peter},
+	}
+	lookBeforeSwitchingLanes := &Duty{
+		Description: "One should always look before changing lanes",
+		OwedFrom:    []*Person{david},
+		OwedTo:      []*Person{peter},
+	}
+
+	driveCarefully := &Duty{
+		Description: "Drive carefully, especially in the presence of playing children",
+		OwedFrom:    []*Person{david},
+		OwedTo:      []*Person{kevin},
+	}
+
+	petersCar1 := &PropertyDamage{
+		Description: "David's car hits Peter's car",
+		Persons:     []*Person{peter},
+	}
+	petersCar2 := &PropertyDamage{
+		Description: "Peters car crashes into the telephone pole",
+		Persons:     []*Person{peter},
+	}
+	poleBroken := &PropertyDamage{
+		Description: "The telephone pole snaps in two",
+		Persons:     []*Person{teleco},
+	}
+	kevinsInjury := &BodilyInjury{
+		Description: "Kevin sustains bodily injuries",
+		Persons:     []*Person{kevin},
+	}
+
+	telephonePoleHitsKevin := &PassiveEvent{
+		Description:       "A piece of the broken telephone pole hits Kevin",
+		InjuriesOrDamages: []InjuryOrDamage{kevinsInjury},
+		Claims:            nil,
+	}
+	telephonePoleSnapsInTwo := &PassiveEvent{
+		Description:       "The telephone pole snaps in two",
+		Consequences:      []Event{telephonePoleHitsKevin},
+		Duty:              buildSafePoles,
+		InjuriesOrDamages: []InjuryOrDamage{poleBroken},
+	}
+	petersCarHitsTelephonePole := &PassiveEvent{
+		Description:       "Peter's car hits a telephone pole",
+		Consequences:      []Event{telephonePoleSnapsInTwo},
+		InjuriesOrDamages: []InjuryOrDamage{petersCar2},
+		Claims:            nil,
+	}
+	peterLosesControlOfTheCar := &Act{
+		Description:  "Peter loses control of his car",
+		Person:       peter,
+		Consequences: []Event{petersCarHitsTelephonePole},
+	}
+	davidsCarHitsPetersCar := &PassiveEvent{
+		Description:       "David's car hits Peter's car",
+		Consequences:      []Event{peterLosesControlOfTheCar},
+		InjuriesOrDamages: []InjuryOrDamage{petersCar1},
+	}
+	speeding := &BrokenLegalRequirement{
+		Description:  "Peter was speeding and overtaking David",
+		Persons:      []*Person{peter},
+		Consequences: []Event{davidsCarHitsPetersCar},
+	}
+	peterIsOvertakingAndSpeeding := &Act{
+		Description:  "Peter is speeding and overtaking David in the lefthand lane",
+		Person:       peter,
+		Consequences: []Event{},
+		NegPerSe:     speeding,
+	}
+	davidSwervesIntoTheOtherLane := &Act{
+		Description:  "David, without looking, swerves into the lane left of him",
+		Person:       david,
+		Consequences: []Event{davidsCarHitsPetersCar},
+		Duty:         lookBeforeSwitchingLanes,
+	}
+	kevinRunsIntoTheStreet := &Act{
+		Description:  "Kevin runs into the street without looking",
+		Person:       kevin,
+		Consequences: []Event{davidSwervesIntoTheOtherLane},
+	}
+	peterDriving := &Act{
+		Description:  "Peter is driving 25 MPH in a 25 MPH street where there are children playing",
+		Person:       peter,
+		Consequences: []Event{davidSwervesIntoTheOtherLane},
+		Duty:         driveCarefully,
+	}
+
+	return &Case{
+		ShortName: "case_teleco",
+		RootEvents: []Event{
+			peterDriving,
+			kevinRunsIntoTheStreet,
+			peterIsOvertakingAndSpeeding,
+		},
+		Text: []string{
+			"David is driving 25 MPH in 25 MPH zone down a four lane street where there are children playing. " +
+				"One nine-year-old child, Kevin, runs into the street chasing a soccer ball. David, without " +
+				"looking over his shoulder, swerves into the other lane to avoid Kevin and in the process he hits " +
+				"a car, driven by Peter, that was speeding past him in the left-hand lane going in the same direction.",
+			"Peter loses control of his car, hits a telephone pole and is seriously and permanently injured. The " +
+				"telephone pole, owned by the local phone company TeleCo, easily snaps into two pieces and hits Kevin, " +
+				"who is still in the street, knocking him unconscious and resulting in permanent injuries.",
+			"TeleCo never did any testing of its poles to establish how easily the poles broke. " +
+				"The only factor used in manufacturing the poles was cost. The poles were made of low quality trees" +
+				"and were not treated in any significant manner except for a coating of tar. No reinforcement was " +
+				"used on the poles.",
+		},
+	}
+}
+
 func GetContent() *Content {
 	return &Content{
 		Questions: []Question{
@@ -220,6 +339,7 @@ func GetContent() *Content {
 				},
 			},
 			DefaultCase(),
+			case2(),
 		},
 	}
 }

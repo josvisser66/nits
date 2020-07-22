@@ -26,7 +26,20 @@ func (c *Case) getShortName() string {
 }
 
 func (c *Case) getConcepts() []*Concept {
-	return nil
+	// This is not entirely true, because not all sub questions might apply to all cases.
+	result := make(map[*Concept]interface{}, 0)
+	for _, sq := range sqMap {
+		for _, c := range sq.getConcepts() {
+			result[c] = nil
+		}
+	}
+
+	ret := make([]*Concept, 0, len(result))
+	for c, _ := range result {
+		ret = append(ret, c)
+	}
+
+	return ret
 }
 
 func (c *Case) getTrainingConcepts(sq subQuestion) []*Concept {
