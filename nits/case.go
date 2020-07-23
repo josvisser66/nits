@@ -91,9 +91,6 @@ func pushSubQuestionCommandContext(ui *userInterface, displaySubQuestion func([]
 // question whose concepts have not yet been mastered and that has not been
 // asked two times already.
 func (c *Case) selectSubQuestion(state *studentState, done map[subQuestion]int) subQuestion {
-	//REMOVEME
-	return &negligencePerSeSubQuestion{}
-	// Let's check what the new scores are...
 	state.train()
 
 	possibles := make([]subQuestion, 0)
