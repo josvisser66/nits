@@ -220,7 +220,7 @@ func (s *studentState) loadUserData() error {
 	s.answers = make([]*answer, 0, len(answers))
 	for _, a := range answers {
 		if a.question != nil {
-			s.answers = append(answers, a)
+			s.answers = append(s.answers, a)
 			s.burnt[a.question] = nil
 		} else if trace != nil {
 			trace.println("Discarding a question.")
