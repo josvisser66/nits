@@ -37,7 +37,11 @@ func displayAnswers(ui *userInterface, state *studentState) {
 	ui.newline()
 
 	for _, answer := range state.answers {
-		ui.println("%5t: %s#%s", answer.correct, answer.questionShortName, answer.subQuestion)
+		ui.print("%5t: %s", answer.correct, answer.questionShortName)
+		if answer.subQuestion != nil {
+			ui.print("#%s", answer.subQuestion)
+		}
+		ui.newline()
 	}
 }
 

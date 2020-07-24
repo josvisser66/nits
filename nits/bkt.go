@@ -96,12 +96,15 @@ type studentState struct {
 
 // newStudentState creates a new student state object.
 func newStudentState(content *Content) *studentState {
-	return &studentState{
-		answers: make([]*answer, 0),
-		burnt:   make(map[Question]interface{}),
-		scores:  make(map[*Concept]float64),
-		content: content,
-	}
+	state := &studentState{content: content}
+	state.reset()
+	return state
+}
+
+func (s *studentState) reset() {
+	s.answers = make([]*answer, 0)
+	s.burnt = make(map[Question]interface{})
+	s.scores = make(map[*Concept]float64)
 }
 
 // registerAnswer registers a new answer in the student state.
@@ -176,7 +179,8 @@ func (s *studentState) saveUserData() error {
 }
 
 // loadUserData loads the student state from ~/.nits_data. Only the
-// registered answers are loaded.
+// registered answers are loaded. If a question/sub-question can not
+// be found the question is discarded.
 func (s *studentState) loadUserData() error {
 	data, err := ioutil.ReadFile(path.Join(mustUserHomeDir(), ".nits_data"))
 	if err != nil {
@@ -184,7 +188,7 @@ func (s *studentState) loadUserData() error {
 	}
 	answers := make([]*answer, 0)
 	s.burnt = make(map[Question]interface{})
-	if err := json.Unmarshal(data, &s.answers); err != nil {
+	if err := json.Unmarshal(data, &answers); err != nil {
 		return err
 	}
 
@@ -203,13 +207,12 @@ func (s *studentState) loadUserData() error {
 			// If the question is a case and the sub question is nil then
 			// drop this question because the sub question has apparently
 			// been removed from the code.
-			if _, ok := a.question.(*Case); ok && a.subQuestion == nil {
+			if c, ok := a.question.(*Case); ok && a.subQuestion == nil {
+				if trace != nil {
+					trace.println("Discarding %s because sq not found", c.ShortName)
+				}
 				a.question = nil
 			}
-		}
-		// Burn this question.
-		if a.question != nil {
-			s.burnt[a.question] = nil
 		}
 	}
 
@@ -218,6 +221,9 @@ func (s *studentState) loadUserData() error {
 	for _, a := range answers {
 		if a.question != nil {
 			s.answers = append(answers, a)
+			s.burnt[a.question] = nil
+		} else if trace != nil {
+			trace.println("Discarding a question.")
 		}
 	}
 

@@ -39,16 +39,26 @@ func Run(content *Content) {
 			{
 				aliases: []string{"exit", "quit"},
 				global:  true,
-				help:    "Exits NITS.",
-				executor: func(line []string) bool {
+				help:    "Exits NITS. Use nosave argument *not* to save the user state.",
+				executor: func(words []string) bool {
 					if sure, _ := ui.yesNo("Are you sure you want to quit"); sure {
-						state.saveUserData()
+						if len(words) == 1 || (len(words) > 1 && words[1] != "nosave") {
+							state.saveUserData()
+						}
 						os.Exit(0)
 					}
 					return false
 				},
 			},
 			{
+				aliases: []string{"reset"},
+				global:  true,
+				help:    "Resets internal student state",
+				executor: func(words []string) bool {
+					state.reset()
+					return false
+				},
+			},{
 				aliases: []string{"debug"},
 				global:  true,
 				help:    "NITS debugging (internal)",
